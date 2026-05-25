@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  kicker       String
+  summary      String
+  description  String
+  deliverables String[]
+  platforms    String[]
+  accent       String   @default("#36f5a2")
+  imageUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  client    String
+  category  String
+  year      Int
+  summary   String
+  impact    String
+  services  String[]
+  platforms String[]
+  imageUrl  String
+  color     String   @default("#36f5a2")
+  metrics   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id              String     @id @default(cuid())
+  name            String
+  email           String
+  company         String
+  phone           String?
+  serviceInterest String?
+  message         String
+  status          LeadStatus @default(NEW)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CLOSED
+}
