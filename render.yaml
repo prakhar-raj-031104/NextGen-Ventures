@@ -3,6 +3,7 @@ services:
   - type: web
     name: nextgen-api
     env: node
+    plan: free
     region: singapore
     buildCommand: npm ci && npm run build:prod -w apps/backend
     startCommand: npm run start:prod -w apps/backend
