@@ -27,7 +27,6 @@ services:
   - type: web
     name: nextgen-web
     env: static
-    region: singapore
     buildCommand: npm ci && npm run build -w apps/frontend
     staticPublishPath: apps/frontend/dist
     envVars:
