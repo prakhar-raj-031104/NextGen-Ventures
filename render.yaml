@@ -5,7 +5,7 @@ services:
     env: node
     plan: free
     region: singapore
-    buildCommand: npm ci && npm run build:prod -w apps/backend
+    buildCommand: npm ci --include=dev && npm run build:prod -w apps/backend
     startCommand: npm run start:prod -w apps/backend
     envVars:
       - key: NODE_ENV
@@ -19,7 +19,7 @@ services:
   - type: web
     name: nextgen-web
     env: static
-    buildCommand: npm ci && npm run build -w apps/frontend
+    buildCommand: npm ci --include=dev && npm run build -w apps/frontend
     staticPublishPath: apps/frontend/dist
     envVars:
       - key: VITE_API_URL
