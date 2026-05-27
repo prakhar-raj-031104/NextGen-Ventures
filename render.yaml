@@ -13,7 +13,7 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGIN
-        value: https://nextgen-web.onrender.com
+        value: https://nextgen-web-g132.onrender.com
 
   # ── Frontend Static Site (React / Vite) ────────────────────────────────────
   - type: web
@@ -23,7 +23,7 @@ services:
     staticPublishPath: apps/frontend/dist
     envVars:
       - key: VITE_API_URL
-        value: https://nextgen-api.onrender.com/api
+        value: https://nextgen-api-3n55.onrender.com/api
     routes:
       - type: rewrite
         source: /*
