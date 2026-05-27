@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { HorizontalProjects } from "../components/HorizontalProjects";
 import { fallbackProjects } from "../data/fallback";
 import { api } from "../lib/api";
@@ -21,6 +22,13 @@ export default function Projects() {
 
   return (
     <>
+      <Helmet>
+        <title>Our Work — NextGen Ventures | Case Studies & Portfolio</title>
+        <meta name="description" content="Explore NextGen Ventures' portfolio — marketplace operations, UI/UX design, website builds, and full-stack applications delivered for real brands." />
+        <meta property="og:title" content="Our Work — NextGen Ventures Portfolio" />
+        <meta property="og:description" content="Case studies across marketplace growth, UI/UX design, website development, and custom applications." />
+        <meta property="og:url" content="https://nextgenventures.in/projects" />
+      </Helmet>
       <section className="page-hero section-shell">
         <div data-reveal="left">
           <p className="eyebrow">Selected Work</p>
@@ -37,24 +45,31 @@ export default function Projects() {
       <section className="section-shell project-grid-section">
         <div className="project-grid">
           {projects.map((project) => (
-            <article className="project-card" key={project.slug} data-reveal data-card-interactive>
-              <div
-                className="project-card__image"
-                style={{ backgroundImage: `url(${project.imageUrl})` }}
-              />
-              <div className="project-card__body">
-                <p className="eyebrow">
-                  {project.category} / {project.year}
-                </p>
-                <h2>{project.title}</h2>
-                <p>{project.impact}</p>
-                <div className="platform-chips">
-                  {project.platforms.map((platform) => (
-                    <span key={platform}>{platform}</span>
-                  ))}
+            <Link
+              key={project.slug}
+              to={`/projects/${project.slug}`}
+              className="project-card-link"
+              aria-label={`View case study: ${project.title}`}
+            >
+              <article className="project-card" data-reveal data-card-interactive>
+                <div
+                  className="project-card__image"
+                  style={{ backgroundImage: `url(${project.imageUrl})` }}
+                />
+                <div className="project-card__body">
+                  <p className="eyebrow">
+                    {project.category} / {project.year}
+                  </p>
+                  <h2>{project.title}</h2>
+                  <p>{project.impact}</p>
+                  <div className="platform-chips">
+                    {project.platforms.map((platform) => (
+                      <span key={platform}>{platform}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </article>
+              </article>
+            </Link>
           ))}
         </div>
       </section>

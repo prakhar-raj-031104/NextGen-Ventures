@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import { Hero } from "../components/Hero";
 import { HorizontalProjects } from "../components/HorizontalProjects";
 import { PlatformMarquee } from "../components/PlatformMarquee";
@@ -34,6 +35,13 @@ export default function Home() {
 
   return (
     <>
+      <Helmet>
+        <title>NextGen Ventures | Marketplace Growth, Design & Digital Marketing — Bengaluru</title>
+        <meta name="description" content="NextGen Ventures — Bengaluru's digital studio for Amazon, Flipkart, Myntra marketplace growth, digital marketing, UI/UX design, website development, and full-stack applications." />
+        <meta property="og:title" content="NextGen Ventures | Marketplace Growth, Design & Digital Marketing" />
+        <meta property="og:description" content="Full-service digital studio: marketplace management, Google Ads, social media, website development, UI/UX design, and custom applications for ambitious brands." />
+        <meta property="og:url" content="https://nextgenventures.in" />
+      </Helmet>
       <Hero />
       <PlatformMarquee items={platformNames} />
       <div className="section-bg-warm">
@@ -53,7 +61,7 @@ export default function Home() {
         <section className="section-shell closing-cta">
           <div data-reveal="left">
             <p className="eyebrow">Ready to build?</p>
-            <h2>Bring your marketplace, website, or product idea into one serious build.</h2>
+            <h2>Bring your marketplace, marketing, website, or product idea to NextGen Ventures.</h2>
           </div>
           <Link className="button button--dark" to="/contact" data-reveal="right">
             Contact Us

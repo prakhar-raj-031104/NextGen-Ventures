@@ -6,7 +6,9 @@ const navItems = [
   { label: "About", href: "/about" },
   { label: "Services", href: "/services" },
   { label: "Projects", href: "/projects" },
-  { label: "Contact", href: "/contact" }
+  { label: "Internship", href: "/internship" },
+  { label: "Contact", href: "/contact" },
+  { label: "Client Portal", href: "/client-portal" }
 ];
 
 export const Header = () => {

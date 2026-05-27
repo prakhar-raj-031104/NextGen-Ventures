@@ -66,36 +66,42 @@ export const HorizontalProjects = ({ projects }: HorizontalProjectsProps) => {
 
       <div className="project-track" ref={trackRef}>
         {projects.map((project) => (
-          <article
-            className="project-panel"
+          <Link
+            to={`/projects/${project.slug}`}
             key={project.slug}
-            data-card-interactive
-            style={{ "--project-color": project.color } as CSSProperties}
+            className="project-panel-link"
+            aria-label={`View case study: ${project.title}`}
           >
-            <div
-              className="project-panel__image"
-              style={{ backgroundImage: `url(${project.imageUrl})` }}
-              role="img"
-              aria-label={`${project.title} preview`}
-            />
-            <div className="project-panel__content">
-              <div>
-                <p className="eyebrow">
-                  {project.client} / {project.year}
-                </p>
-                <h3>{project.title}</h3>
-                <p>{project.summary}</p>
+            <article
+              className="project-panel"
+              data-card-interactive
+              style={{ "--project-color": project.color } as CSSProperties}
+            >
+              <div
+                className="project-panel__image"
+                style={{ backgroundImage: `url(${project.imageUrl})` }}
+                role="img"
+                aria-label={`${project.title} preview`}
+              />
+              <div className="project-panel__content">
+                <div>
+                  <p className="eyebrow">
+                    {project.client} / {project.year}
+                  </p>
+                  <h3>{project.title}</h3>
+                  <p>{project.summary}</p>
+                </div>
+                <div className="metric-row">
+                  {project.metrics.map((metric) => (
+                    <span key={metric.label}>
+                      <strong>{metric.value}</strong>
+                      {metric.label}
+                    </span>
+                  ))}
+                </div>
               </div>
-              <div className="metric-row">
-                {project.metrics.map((metric) => (
-                  <span key={metric.label}>
-                    <strong>{metric.value}</strong>
-                    {metric.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </article>
+            </article>
+          </Link>
         ))}
       </div>
     </section>

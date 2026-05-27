@@ -3,24 +3,24 @@ import { SectionHeading } from "./SectionHeading";
 const testimonials = [
   {
     quote:
-      "They rebuilt our entire Flipkart catalog in three weeks. Listing quality went from 62% to 91% and the dashboard gives our team real-time visibility we never had before.",
-    author: "Priya Sharma",
-    role: "Growth Manager",
-    company: "Nexa Appliances"
-  },
-  {
-    quote:
-      "The website they delivered is genuinely the best in our category. Motion feels intentional, the CMS is clean, and we launched on schedule with zero rework.",
-    author: "Rohan Mehta",
+      "NextGen Ventures built us a platform that genuinely made legal services approachable. The flows are clean, the interface is fast, and our clients can now complete trademark and company filing journeys without needing to call us first.",
+    author: "Rajesh Verma",
     role: "Founder",
-    company: "KindleLeaf Wellness"
+    company: "MeraTM Legal Platform"
   },
   {
     quote:
-      "We handed over a mess of spreadsheets. They handed back a working dashboard. Our ops team now runs entirely on it every single day.",
-    author: "Ananya Gupta",
-    role: "Head of Operations",
-    company: "Aurora Home"
+      "Our travel website went from a static brochure to a full booking experience. Customers can now browse packages, plan itineraries, and send enquiries in one seamless flow. The response from our clients was immediate.",
+    author: "Suresh Pandey",
+    role: "Director",
+    company: "Om Travels Satna"
+  },
+  {
+    quote:
+      "The website they built for us communicates trust and compliance exactly the way we needed. Investors land on our page and immediately see a professional, RBI-aware advisory firm — not just another financial website.",
+    author: "Amit Jain",
+    role: "Managing Director",
+    company: "Hindustan FinServe"
   }
 ];
 
@@ -30,7 +30,7 @@ export const Testimonials = () => (
       eyebrow="Client Feedback"
       title="Words from teams that have shipped with us."
     />
-    <div className="testimonials-grid" data-stagger>
+    <div className="testimonials-grid">
       {testimonials.map((item) => (
         <article key={item.author} className="testimonial-card" data-card-interactive>
           <span className="quote-mark" aria-hidden="true">"</span>

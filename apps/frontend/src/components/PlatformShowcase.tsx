@@ -51,7 +51,7 @@ export const PlatformShowcase = () => (
 
       <div className="showcase-list">
         {rows.map((row) => (
-          <article key={row.title} data-reveal data-card-interactive>
+          <article key={row.title} data-reveal="right" data-card-interactive>
             <CheckCircle2 size={22} aria-hidden="true" />
             <div>
               <h3>{row.title}</h3>

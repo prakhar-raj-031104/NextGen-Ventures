@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SectionHeading } from "../components/SectionHeading";
 import { fallbackServices } from "../data/fallback";
 import { api } from "../lib/api";
 import type { Service } from "../types";
 
+gsap.registerPlugin(ScrollTrigger);
+
 export default function Services() {
   const [services, setServices] = useState<Service[]>(fallbackServices);
+  const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -20,16 +26,95 @@ export default function Services() {
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(".service-detail");
+      const HEADER = 88;
+
+      cards.forEach((card, i) => {
+        const isLast = i === cards.length - 1;
+
+        // ── Pin: freeze each card once it reaches the sticky top ───────
+        if (!isLast) {
+          ScrollTrigger.create({
+            trigger: card,
+            start: `top ${HEADER}px`,
+            endTrigger: ".service-fit",
+            end: "top bottom",
+            pin: true,
+            pinSpacing: false
+          });
+
+          // ── Scale down as the next card slides up — no opacity change ─
+          gsap.to(card, {
+            scale: 0.9,
+            ease: "none",
+            scrollTrigger: {
+              trigger: cards[i + 1],
+              start: "top bottom",
+              end: `top ${HEADER}px`,
+              scrub: 2
+            }
+          });
+        }
+
+        // ── Media parallax ──────────────────────────────────────────────
+        const media = card.querySelector<HTMLElement>(".service-detail__media");
+        if (media) {
+          gsap.fromTo(
+            media,
+            { scale: 1.08 },
+            {
+              scale: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.8
+              }
+            }
+          );
+        }
+      });
+
+      // ── Fit-grid entrance ───────────────────────────────────────────────
+      gsap.fromTo(
+        ".fit-grid article",
+        { y: 36, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.8,
+          ease: "expo.out",
+          stagger: 0.1,
+          scrollTrigger: { trigger: ".fit-grid", start: "top 82%", once: true }
+        }
+      );
+    }, pageRef);
+    return () => ctx.revert();
+  }, [services]);
+
   return (
-    <>
+    <div ref={pageRef}>
+      <Helmet>
+        <title>Services — NextGen Ventures | Marketplace, Marketing, Design & Development</title>
+        <meta name="description" content="Marketplace growth (Amazon, Flipkart, Myntra, JioMart, Meesho), digital marketing, UI/UX design, website development, e-commerce imaging, and application development." />
+        <meta property="og:title" content="Services — NextGen Ventures" />
+        <meta property="og:description" content="6 focused service lines: Marketplace Growth, Digital Marketing, UI/UX Design, Website Development, E-commerce Imaging, and Application Development." />
+        <meta property="og:url" content="https://nextgenventures.in/services" />
+      </Helmet>
+
       <section className="page-hero section-shell">
         <div data-reveal="left">
           <p className="eyebrow">Services</p>
-          <h1>Marketplace growth, UI UX design, websites, and full-stack application development.</h1>
+          <h1>Marketplace growth, digital marketing, design, websites, and applications.</h1>
         </div>
         <p data-reveal="right">
-          NextGen Ventures supports ecommerce businesses selling on Amazon, Myntra, and Flipkart while
-          also designing and developing complete websites and custom applications.
+          NextGen Ventures covers the full digital stack — from Amazon and Flipkart marketplace management
+          to Google Ads, UI/UX design, WordPress and React websites, product imaging, and custom applications.
+          Real work for real brands — with live results you can verify.
         </p>
       </section>
 
@@ -38,8 +123,7 @@ export default function Services() {
           <article
             className="service-detail"
             key={service.slug}
-            style={{ "--accent": service.accent } as CSSProperties}
-            data-reveal
+            style={{ "--accent": service.accent, zIndex: index + 1 } as CSSProperties}
             data-card-interactive
           >
             <div
@@ -47,28 +131,48 @@ export default function Services() {
               style={{ backgroundImage: service.imageUrl ? `url(${service.imageUrl})` : undefined }}
             />
             <div className="service-detail__content">
-              <span>{String(index + 1).padStart(2, "0")}</span>
+              <span className="service-detail__num">{String(index + 1).padStart(2, "0")}</span>
               <p className="eyebrow">{service.kicker}</p>
               <h2>{service.title}</h2>
               <p>{service.description}</p>
+
+              {/* Deliverables */}
               <div className="deliverables">
-                {service.deliverables.map((item) => (
+                {service.deliverables.slice(0, 5).map((item) => (
                   <span key={item}>
-                    <Check size={16} aria-hidden="true" />
+                    <Check size={15} aria-hidden="true" />
                     {item}
                   </span>
                 ))}
               </div>
-              <div className="platform-chips">
+
+              {/* Client work badge strip */}
+              {service.caseStudies && service.caseStudies.length > 0 && (
+                <div className="service-detail__clients">
+                  <span className="service-detail__clients-label">Work done for:</span>
+                  {service.caseStudies.map((cs) => (
+                    <span
+                      key={cs.client}
+                      className="service-detail__client-badge"
+                      style={{ "--badge-color": cs.color } as CSSProperties}
+                    >
+                      {cs.client}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="platform-chips" style={{ marginTop: "4px" }}>
                 {service.platforms.map((platform) => (
                   <span key={platform}>{platform}</span>
                 ))}
               </div>
+
               <Link
                 className="service-detail__cta"
                 to={`/services/${service.slug}`}
               >
-                View Plans
+                View Plans & Our Work
                 <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
             </div>
@@ -79,36 +183,43 @@ export default function Services() {
       <section className="section-shell service-fit">
         <SectionHeading
           eyebrow="Best Fit"
-          title="Built for founders, ecommerce managers, and teams replacing manual workflows."
+          title="Built for founders, ecommerce brands, and teams replacing manual workflows."
         />
-        <div className="fit-grid" data-stagger>
+        <div className="fit-grid">
           <article data-card-interactive>
             <h3>For marketplace brands</h3>
             <p>
-              Launch, organize, and optimize listings with full visibility across SKU performance,
-              campaign health, pricing, and inventory across Amazon, Myntra, and Flipkart.
+              Launch from zero or scale existing operations — listings, catalog management, brand store,
+              campaign tracking, and product images across Amazon, Flipkart, Myntra, JioMart, and Meesho.
             </p>
           </article>
           <article data-card-interactive>
-            <h3>For service companies</h3>
+            <h3>For growth-focused businesses</h3>
             <p>
-              Get a premium website with strong content hierarchy, polished motion, clear conversion
-              paths, and a backend-ready enquiry system from day one.
+              Run Google Ads, manage your Instagram and Facebook handles, deploy WhatsApp bulk campaigns,
+              and track leads with a digital marketing setup built around your budget.
             </p>
           </article>
           <article data-card-interactive>
-            <h3>For software ideas</h3>
+            <h3>For brands needing a web presence</h3>
             <p>
-              Turn complex workflows into clean, scalable web applications with React, typed APIs,
-              Prisma data models, and PostgreSQL — built for real daily use.
+              Get a premium React or WordPress website, an ecommerce storefront, or a full-stack
+              application — designed with motion, SEO foundations, and a CMS your team can manage.
+            </p>
+          </article>
+          <article data-card-interactive>
+            <h3>For product teams & corporates</h3>
+            <p>
+              Turn complex workflows into clean SaaS dashboards, admin portals, or enterprise platforms
+              with React, typed APIs, PostgreSQL data models, and role-based access from day one.
             </p>
           </article>
         </div>
         <Link className="button button--dark" to="/contact" data-reveal>
-          Plan a Build
+          Plan a Project
           <ArrowRight size={18} aria-hidden="true" />
         </Link>
       </section>
-    </>
+    </div>
   );
 }

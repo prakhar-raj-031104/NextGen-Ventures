@@ -5,32 +5,46 @@ import { HttpError } from "../utils/http-error.js";
 
 export const errorHandler = (
   error: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
-) => {
+): void => {
+  const requestId = res.locals["requestId"] as string | undefined;
+
   if (error instanceof ZodError) {
-    return res.status(422).json({
+    res.status(422).json({
       error: {
         message: "Validation failed",
-        details: error.flatten()
+        details: error.flatten(),
+        requestId
       }
     });
+    return;
   }
 
   if (error instanceof HttpError) {
-    return res.status(error.statusCode).json({
+    res.status(error.statusCode).json({
       error: {
         message: error.message,
-        details: error.details
+        ...(error.details !== undefined && { details: error.details }),
+        requestId
       }
     });
+    return;
   }
 
-  const payload =
-    env.NODE_ENV === "production"
-      ? { message: "Something went wrong" }
-      : { message: error.message, stack: error.stack };
+  if (env.NODE_ENV !== "production") {
+    console.error(`[${requestId ?? "no-id"}] Unhandled error on ${req.method} ${req.path}:`, error);
+  }
 
-  return res.status(500).json({ error: payload });
+  res.status(500).json({
+    error: {
+      message:
+        env.NODE_ENV === "production"
+          ? "An unexpected error occurred. Please try again later."
+          : error.message,
+      ...(env.NODE_ENV !== "production" && { stack: error.stack }),
+      requestId
+    }
+  });
 };

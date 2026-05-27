@@ -18,6 +18,7 @@ model Service {
   platforms    String[]
   accent       String   @default("#36f5a2")
   imageUrl     String?
+  whyUs        String[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -35,6 +36,7 @@ model Project {
   platforms String[]
   imageUrl  String
   color     String   @default("#36f5a2")
+  liveUrl   String?
   metrics   Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,6 +49,9 @@ model Lead {
   company         String
   phone           String?
   serviceInterest String?
+  budget          String?
+  timeline        String?
+  businessType    String?
   message         String
   status          LeadStatus @default(NEW)
   createdAt       DateTime   @default(now())
@@ -58,4 +63,55 @@ enum LeadStatus {
   CONTACTED
   QUALIFIED
   CLOSED
+}
+
+model ClientTicket {
+  id           String       @id @default(cuid())
+  ticketNumber String       @unique
+  clientName   String
+  email        String
+  company      String
+  projectRef   String
+  serviceType  String
+  requestType  String
+  priority     String       @default("NORMAL")
+  title        String
+  description  String
+  timeline     String?
+  status       TicketStatus @default(OPEN)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+enum TicketStatus {
+  OPEN
+  IN_REVIEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model InternshipApplication {
+  id         String           @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  role       String
+  education  String
+  skills     String
+  portfolio  String?
+  linkedin   String?
+  coverNote  String
+  resumeUrl  String?
+  status     InternshipStatus @default(PENDING)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+}
+
+enum InternshipStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  OFFERED
+  REJECTED
 }

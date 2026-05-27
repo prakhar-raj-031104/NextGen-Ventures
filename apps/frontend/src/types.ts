@@ -26,11 +26,39 @@ export type Service = {
   imageUrl?: string | null;
   plans?: PricingPlan[];
   faq?: FaqItem[];
+  caseStudies?: ServiceCaseStudy[];
+  whyUs?: string[];
+  reviews?: ClientReview[];
 };
 
 export type Metric = {
   label: string;
   value: string;
+};
+
+export type PlatformLink = {
+  platform: string;
+  url: string;
+};
+
+export type ClientReview = {
+  author: string;
+  role: string;
+  company: string;
+  rating: number;
+  text: string;
+};
+
+export type ServiceCaseStudy = {
+  client: string;
+  category: string;
+  description: string;
+  work: string[];
+  imageUrl: string;
+  platforms: string[];
+  color: string;
+  liveUrl?: string;
+  links?: PlatformLink[];
 };
 
 export type Project = {
@@ -46,7 +74,10 @@ export type Project = {
   platforms: string[];
   imageUrl: string;
   color: string;
+  liveUrl?: string;
   metrics: Metric[];
+  links?: PlatformLink[];
+  review?: ClientReview;
 };
 
 export type LeadPayload = {
@@ -55,5 +86,33 @@ export type LeadPayload = {
   company: string;
   phone?: string;
   serviceInterest?: string;
+  budget?: string;
+  timeline?: string;
+  businessType?: string;
   message: string;
+};
+
+export type TicketPayload = {
+  clientName: string;
+  email: string;
+  company: string;
+  projectRef: string;
+  serviceType: string;
+  requestType: string;
+  priority: "NORMAL" | "HIGH" | "URGENT";
+  title: string;
+  description: string;
+  timeline?: string;
+};
+
+export type InternshipPayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  education: string;
+  skills: string;
+  portfolio?: string;
+  linkedin?: string;
+  coverNote: string;
 };

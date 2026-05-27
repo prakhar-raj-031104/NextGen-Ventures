@@ -26,7 +26,7 @@ export const ProcessRail = () => (
       title="Simple enough to follow, detailed enough to ship properly."
     />
 
-    <div className="process-rail" data-stagger>
+    <div className="process-rail">
       {steps.map((step, index) => (
         <article key={step.title} data-card-interactive>
           <span>{String(index + 1).padStart(2, "0")}</span>

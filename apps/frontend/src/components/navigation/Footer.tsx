@@ -37,10 +37,19 @@ export const Footer = () => (
 
         <div className="footer-col">
           <h3>Capabilities</h3>
-          <span>Marketplace Growth</span>
-          <span>UI / UX Design</span>
-          <span>Website Development</span>
-          <span>App Development</span>
+          <Link to="/services/marketplace-growth">Marketplace Growth</Link>
+          <Link to="/services/digital-marketing">Digital Marketing</Link>
+          <Link to="/services/ui-ux-design">UI / UX Design</Link>
+          <Link to="/services/website-design-development">Website Development</Link>
+          <Link to="/services/ecommerce-imaging">E-commerce Imaging</Link>
+          <Link to="/services/application-development">App Development</Link>
+        </div>
+
+        <div className="footer-col">
+          <h3>Portal</h3>
+          <Link to="/client-portal">Client Portal</Link>
+          <Link to="/internship">Internship</Link>
+          <a href="mailto:hello@nextgenventures.in">hello@nextgenventures.in</a>
         </div>
 
         <div className="footer-col">

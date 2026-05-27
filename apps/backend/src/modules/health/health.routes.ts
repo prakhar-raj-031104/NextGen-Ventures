@@ -1,13 +1,6 @@
 import { Router } from "express";
+import { getHealth } from "./health.controller.js";
 
 export const healthRouter = Router();
 
-healthRouter.get("/", (_req, res) => {
-  res.json({
-    data: {
-      status: "ok",
-      service: "nextgen-saas-api",
-      timestamp: new Date().toISOString()
-    }
-  });
-});
+healthRouter.get("/", getHealth);
