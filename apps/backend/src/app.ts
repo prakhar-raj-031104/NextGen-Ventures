@@ -1,6 +1,7 @@
 import path from "path";
 import cors from "cors";
 import express from "express";
+import type { Response } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
 import { corsOrigins, env } from "./config/env.js";
@@ -44,7 +45,7 @@ export const createApp = () => {
   app.use(express.json({ limit: "1mb" }));
 
   // ── HTTP request logging ──────────────────────────────────────────────
-  morgan.token("req-id", (_req, res) => res.locals["requestId"] as string ?? "-");
+  morgan.token("req-id", (_req, res) => (res as Response).locals["requestId"] as string ?? "-");
   app.use(
     morgan(
       env.NODE_ENV === "production"
@@ -57,7 +58,7 @@ export const createApp = () => {
   app.use("/api", apiRateLimiter);
 
   // ── Static uploads (resumes, etc.) ───────────────────────────────────
-  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+  app.use("/uploads", express.static(env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads")));
 
   // ── Routes ────────────────────────────────────────────────────────────
   app.use("/api", apiRouter);

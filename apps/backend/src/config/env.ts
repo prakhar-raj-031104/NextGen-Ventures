@@ -10,7 +10,8 @@ const envSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(15 * 60 * 1000), // 15 min
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   LEAD_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60 * 60 * 1000), // 1 hour
-  LEAD_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10)
+  LEAD_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
+  UPLOAD_DIR: z.string().optional()
 });
 
 const result = envSchema.safeParse(process.env);

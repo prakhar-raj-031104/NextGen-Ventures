@@ -24,7 +24,7 @@ export const leadRateLimiter = rateLimit({
   max: env.LEAD_RATE_LIMIT_MAX,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? "unknown"),
   handler(req, res) {
     const retryAfter = Math.ceil(env.LEAD_RATE_LIMIT_WINDOW_MS / 1000);
     res.status(429).json(rateLimitResponse(retryAfter));
@@ -37,7 +37,7 @@ export const ticketRateLimiter = rateLimit({
   max: 15,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? "unknown"),
   handler(_req, res) {
     res.status(429).json(rateLimitResponse(3600));
   }
@@ -49,7 +49,7 @@ export const internshipRateLimiter = rateLimit({
   max: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
-  keyGenerator: (req) => ipKeyGenerator(req),
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? "unknown"),
   handler(_req, res) {
     res.status(429).json(rateLimitResponse(86400));
   }

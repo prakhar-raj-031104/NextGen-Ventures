@@ -1,6 +1,7 @@
 import path from "path";
 import multer from "multer";
 import type { Request } from "express";
+import { env } from "../config/env.js";
 import { HttpError } from "../utils/http-error.js";
 
 const ALLOWED_MIME = new Set([
@@ -9,9 +10,11 @@ const ALLOWED_MIME = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
+const uploadBase = env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, path.join(process.cwd(), "uploads", "resumes"));
+    cb(null, path.join(uploadBase, "resumes"));
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
