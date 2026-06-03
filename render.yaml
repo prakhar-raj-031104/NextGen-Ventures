@@ -26,5 +26,6 @@ services:
         value: https://nextgen-api-3n55.onrender.com/api
     routes:
       - type: rewrite
-        source: /*
+        source: /*se
+        
         destination: /index.html

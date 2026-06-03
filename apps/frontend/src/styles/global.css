@@ -737,7 +737,7 @@ p {
   min-height: 100svh;
   display: flex;
   align-items: center;
-  padding-top: 140px;
+  padding-top: 56px;
   padding-bottom: 80px;
   overflow: hidden;
   isolation: isolate;
@@ -988,7 +988,9 @@ p {
   animation: hero-badge-float var(--badge-dur, 5.5s) ease-in-out var(--badge-delay, 0s) infinite;
   will-change: transform;
   transition: border-color 240ms ease, background 240ms ease, scale 240ms ease;
-  cursor: default;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ink);
 }
 
 .hero-service-badge:hover {
@@ -1328,6 +1330,89 @@ p {
 
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* ── Top service belt (below navbar on landing page) ───────── */
+.service-belt {
+  margin-top: 68px;
+  overflow: hidden;
+  border-block: 1px solid rgba(255, 106, 26, 0.22);
+  background:
+    linear-gradient(90deg, rgba(255, 106, 26, 0.1), rgba(255, 157, 66, 0.04) 50%, rgba(255, 106, 26, 0.1)),
+    #100d0a;
+  position: relative;
+}
+
+.service-belt::before,
+.service-belt::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.service-belt::before {
+  left: 0;
+  background: linear-gradient(90deg, #0c0b0a, transparent);
+}
+
+.service-belt::after {
+  right: 0;
+  background: linear-gradient(270deg, #0c0b0a, transparent);
+}
+
+.service-belt__track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+.service-belt:hover .service-belt__track {
+  animation-play-state: paused;
+}
+
+.service-belt__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  padding: 13px 34px;
+  white-space: nowrap;
+  color: rgba(255, 247, 239, 0.92);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: color 0.25s ease;
+}
+
+.service-belt__item:hover {
+  color: var(--orange);
+}
+
+.service-belt__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  box-shadow: 0 0 8px rgba(255, 106, 26, 0.9), 0 0 0 4px rgba(255, 106, 26, 0.12);
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-belt__track {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .service-belt__item {
+    font-size: 0.8rem;
+    padding: 12px 22px;
+    gap: 11px;
   }
 }
 
@@ -2039,6 +2124,17 @@ p {
   background: var(--panel);
   transform-origin: top center;
   will-change: transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Mobile: drop GPU promotion + transform-origin so scroll is light & natural */
+@media (max-width: 860px) {
+  .service-detail {
+    will-change: auto;
+    transform: none;
+    backface-visibility: visible;
+  }
 }
 
 .service-detail__media {
@@ -3462,6 +3558,27 @@ textarea {
     box-shadow 180ms ease;
 }
 
+/* ── Select: remove native arrow, inject custom chevron ──────── */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255%2C247%2C239%2C0.55)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  background-size: 16px 16px;
+}
+
+select:hover {
+  border-color: rgba(255, 247, 239, 0.3);
+}
+
+select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff6a1a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
 input:focus,
 select:focus,
 textarea:focus {
@@ -4000,6 +4117,130 @@ textarea {
 }
 
 /* ── Contact form extras ─────────────────────────────────── */
+
+.field-label {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+/* ── Multi-select service interest ───────────────────────── */
+.service-interest {
+  display: grid;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.service-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.service-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px 7px 14px;
+  border: 1px solid rgba(255, 106, 26, 0.4);
+  border-radius: 999px;
+  background: rgba(255, 106, 26, 0.12);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.service-chip button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 247, 239, 0.12);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.service-chip button:hover {
+  background: var(--orange);
+  color: #0c0b0a;
+}
+
+.service-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.service-suggestions__label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.service-suggestion {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 0;
+  padding: 6px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+
+.service-suggestion:hover {
+  border-color: var(--orange);
+  background: rgba(255, 106, 26, 0.1);
+  color: var(--ink);
+}
+
+.service-custom {
+  display: flex;
+  gap: 8px;
+}
+
+.service-custom input {
+  flex: 1;
+}
+
+.service-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-height: 48px;
+  flex-shrink: 0;
+  border: 1px solid var(--orange);
+  border-radius: 8px;
+  background: rgba(255, 106, 26, 0.14);
+  color: var(--orange);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, opacity 160ms ease;
+}
+
+.service-add-btn:hover:not(:disabled) {
+  background: var(--orange);
+  color: #0c0b0a;
+}
+
+.service-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 .required-mark {
   color: var(--orange);
@@ -5499,7 +5740,7 @@ textarea {
 .cp-field select:hover,
 .cp-field textarea:hover {
   border-color: rgba(255, 106, 26, 0.4);
-  background: rgba(255, 106, 26, 0.03);
+  background-color: rgba(255, 106, 26, 0.03);
 }
 
 .cp-field input:focus,
@@ -5507,7 +5748,7 @@ textarea {
 .cp-field textarea:focus {
   border-color: var(--orange);
   box-shadow: 0 0 0 4px rgba(255, 106, 26, 0.14), 0 2px 12px rgba(255, 106, 26, 0.1);
-  background: rgba(255, 106, 26, 0.04);
+  background-color: rgba(255, 106, 26, 0.04);
   outline: none;
 }
 

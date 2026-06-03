@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Send } from "lucide-react";
+import { Plus, Send, X } from "lucide-react";
 import { api } from "../lib/api";
 import type { LeadPayload, Service } from "../types";
 
@@ -45,14 +45,53 @@ const businessTypeOptions = [
   "Other"
 ];
 
+// Extra services we can suggest beyond the core service list
+const suggestedExtras = [
+  "SEO Optimisation",
+  "Branding & Logo Design",
+  "Content Writing",
+  "Hosting & Maintenance",
+  "Social Media Management",
+  "Analytics & Reporting"
+];
+
 export const ContactForm = ({ services }: ContactFormProps) => {
   const [form, setForm] = useState<LeadPayload>(initialForm);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
+  // Multi-select service interest
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [customService, setCustomService] = useState("");
+
   const updateField = (field: keyof LeadPayload, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
+
+  const syncServices = (next: string[]) => {
+    setSelectedServices(next);
+    setForm((current) => ({ ...current, serviceInterest: next.join(", ") }));
+  };
+
+  const addService = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed || selectedServices.includes(trimmed)) return;
+    syncServices([...selectedServices, trimmed]);
+  };
+
+  const removeService = (value: string) =>
+    syncServices(selectedServices.filter((service) => service !== value));
+
+  const addCustomService = () => {
+    addService(customService);
+    setCustomService("");
+  };
+
+  // Suggestions still available to add (core services + extras, minus chosen)
+  const remainingSuggestions = [
+    ...services.map((service) => service.title),
+    ...suggestedExtras
+  ].filter((title, index, all) => all.indexOf(title) === index && !selectedServices.includes(title));
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -77,6 +116,8 @@ export const ContactForm = ({ services }: ContactFormProps) => {
       setStatus("success");
       setMessage("Your enquiry has been sent. We will get back to you within one business day.");
       setForm(initialForm);
+      setSelectedServices([]);
+      setCustomService("");
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Unable to send your message. Please try again.");
@@ -89,7 +130,7 @@ export const ContactForm = ({ services }: ContactFormProps) => {
       {/* Row 1: Name + Email */}
       <div className="form-grid">
         <label>
-          Name <span className="required-mark">*</span>
+          <span className="field-label">Name <span className="required-mark">*</span></span>
           <input
             required
             minLength={2}
@@ -99,7 +140,7 @@ export const ContactForm = ({ services }: ContactFormProps) => {
           />
         </label>
         <label>
-          Work Email <span className="required-mark">*</span>
+          <span className="field-label">Work Email <span className="required-mark">*</span></span>
           <input
             required
             type="email"
@@ -113,7 +154,7 @@ export const ContactForm = ({ services }: ContactFormProps) => {
       {/* Row 2: Company + Phone */}
       <div className="form-grid">
         <label>
-          Company <span className="required-mark">*</span>
+          <span className="field-label">Company <span className="required-mark">*</span></span>
           <input
             required
             minLength={2}
@@ -123,7 +164,7 @@ export const ContactForm = ({ services }: ContactFormProps) => {
           />
         </label>
         <label>
-          Phone <span className="form-optional">(optional)</span>
+          <span className="field-label">Phone <span className="form-optional">(optional)</span></span>
           <input
             value={form.phone}
             onChange={(e) => updateField("phone", e.target.value)}
@@ -132,21 +173,86 @@ export const ContactForm = ({ services }: ContactFormProps) => {
         </label>
       </div>
 
-      {/* Service interest */}
-      <label>
-        Service Interest
+      {/* Service interest — multi-select with custom additions */}
+      <div className="service-interest">
+        <span className="field-label">Service Interest</span>
+
+        {/* Selected services as removable chips */}
+        {selectedServices.length > 0 && (
+          <div className="service-chips">
+            {selectedServices.map((service) => (
+              <span key={service} className="service-chip">
+                {service}
+                <button
+                  type="button"
+                  onClick={() => removeService(service)}
+                  aria-label={`Remove ${service}`}
+                >
+                  <X size={13} aria-hidden="true" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Pick from suggestions */}
         <select
-          value={form.serviceInterest}
-          onChange={(e) => updateField("serviceInterest", e.target.value)}
+          value=""
+          onChange={(e) => addService(e.target.value)}
+          aria-label="Add a service"
         >
-          <option value="">Select a service</option>
-          {services.map((service) => (
-            <option key={service.slug} value={service.title}>
-              {service.title}
+          <option value="">
+            {selectedServices.length ? "Add another service…" : "Select a service"}
+          </option>
+          {remainingSuggestions.map((title) => (
+            <option key={title} value={title}>
+              {title}
             </option>
           ))}
         </select>
-      </label>
+
+        {/* Quick-add suggestion chips */}
+        {remainingSuggestions.length > 0 && (
+          <div className="service-suggestions">
+            <span className="service-suggestions__label">Suggested:</span>
+            {remainingSuggestions.slice(0, 5).map((title) => (
+              <button
+                key={title}
+                type="button"
+                className="service-suggestion"
+                onClick={() => addService(title)}
+              >
+                <Plus size={12} aria-hidden="true" />
+                {title}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Add your own custom service */}
+        <div className="service-custom">
+          <input
+            value={customService}
+            onChange={(e) => setCustomService(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addCustomService();
+              }
+            }}
+            placeholder="Add your own service…"
+          />
+          <button
+            type="button"
+            className="service-add-btn"
+            onClick={addCustomService}
+            disabled={!customService.trim()}
+            aria-label="Add custom service"
+          >
+            <Plus size={16} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
 
       {/* Row 3: Business type + Budget */}
       <div className="form-grid">
@@ -192,7 +298,7 @@ export const ContactForm = ({ services }: ContactFormProps) => {
 
       {/* Message */}
       <label>
-        Project Brief <span className="required-mark">*</span>
+        <span className="field-label">Project Brief <span className="required-mark">*</span></span>
         <textarea
           required
           minLength={10}

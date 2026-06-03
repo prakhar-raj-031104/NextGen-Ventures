@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { ArrowRight, Boxes, Globe, ShoppingBag, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Boxes, Code, Globe, ShoppingBag, ShoppingCart, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RoboticText } from "./RoboticText";
 import { ThreeBackground } from "./ThreeBackground";
@@ -19,19 +19,21 @@ const headlineWords = [
 ];
 
 const heroStats = [
-  { value: 30, suffix: "+", label: "Builds" },
+  { value: 100, suffix: "+", label: "Builds" },
   { value: 6, suffix: "", label: "Service Lines" },
-  { value: 5, suffix: "", label: "Marketplaces" },
+  { value: 3, suffix: "", label: "Marketplaces" },
   { value: 100, suffix: "%", label: "Yours to Keep" }
 ];
 
 const floatingServices = [
-  { name: "Marketplace Growth", accent: "#36f5a2", icon: ShoppingBag, delay: "0s",    dur: "5.4s" },
-  { name: "Digital Marketing",  accent: "#c084fc", icon: TrendingUp,   delay: "0.7s",  dur: "6.1s" },
-  { name: "UI / UX Design",     accent: "#ff5c35", icon: Sparkles,     delay: "1.4s",  dur: "5.8s" },
-  { name: "Website Dev",        accent: "#00a3ff", icon: Globe,        delay: "0.3s",  dur: "6.6s" },
-  { name: "Product Imaging",    accent: "#fbbf24", icon: Boxes,        delay: "1.1s",  dur: "5.2s" },
-  { name: "Application Dev",    accent: "#ffe45c", icon: Zap,          delay: "2.1s",  dur: "6.9s" }
+  { name: "Website Dev",         slug: "website-design-development", accent: "#00a3ff", icon: Globe,        delay: "0s",    dur: "5.4s" },
+  { name: "Application Dev",     slug: "application-development",    accent: "#ffe45c", icon: Zap,          delay: "0.3s",  dur: "6.6s" },
+  { name: "Software Development",slug: "application-development",    accent: "#22d3ee", icon: Code,         delay: "0.7s",  dur: "5.8s" },
+  { name: "E-commerce",          slug: "ecommerce-imaging",          accent: "#ff8a3d", icon: ShoppingCart, delay: "1.1s",  dur: "6.1s" },
+  { name: "Marketplace Growth",  slug: "marketplace-growth",         accent: "#36f5a2", icon: ShoppingBag,  delay: "1.4s",  dur: "5.2s" },
+  { name: "Digital Marketing",   slug: "digital-marketing",          accent: "#c084fc", icon: TrendingUp,   delay: "1.8s",  dur: "6.4s" },
+  { name: "UI / UX Design",      slug: "ui-ux-design",               accent: "#ff5c35", icon: Sparkles,     delay: "2.1s",  dur: "5.6s" },
+  { name: "Product Imaging",     slug: "ecommerce-imaging",          accent: "#fbbf24", icon: Boxes,        delay: "2.5s",  dur: "6.9s" }
 ];
 
 export const Hero = () => {
@@ -147,9 +149,11 @@ export const Hero = () => {
             {floatingServices.map((service) => {
               const Icon = service.icon;
               return (
-                <div
+                <Link
                   key={service.name}
+                  to={`/services/${service.slug}`}
                   className="hero-service-badge"
+                  aria-label={`View ${service.name} service`}
                   style={
                     {
                       "--badge-accent": service.accent,
@@ -163,14 +167,14 @@ export const Hero = () => {
                   </span>
                   <span className="hero-service-badge__name">{service.name}</span>
                   <span className="hero-service-badge__dot" aria-hidden="true" />
-                </div>
+                </Link>
               );
             })}
           </div>
 
           {/* Marketplace channel strip */}
           <div className="hero-channel-strip">
-            {["Amazon", "Flipkart", "Myntra", "JioMart", "Meesho"].map((ch) => (
+            {["Amazon", "Flipkart", "Myntra"].map((ch) => (
               <span key={ch}>{ch}</span>
             ))}
           </div>

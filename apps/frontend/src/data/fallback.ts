@@ -716,7 +716,7 @@ export const fallbackServices: Service[] = [
     ],
     platforms: ["Google Ads", "Instagram", "Facebook", "WhatsApp", "Email", "Meta Ads"],
     accent: "#c084fc",
-    imageUrl: `${imageBase}/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=1600&q=85`,
+    imageUrl: `/digital-marketing.jpg`,
     plans: digitalMarketingPlans,
     faq: digitalMarketingFaq,
     whyUs: [

@@ -317,32 +317,6 @@ export default function ClientPortal() {
       </section>
 
       {/* ══════════════════════════════════════════════════════ */}
-      {/* WHAT YOU CAN REQUEST                                  */}
-      {/* ══════════════════════════════════════════════════════ */}
-      <section className="section-shell cp-what-section" data-reveal>
-        <div className="cp-section-intro">
-          <p className="eyebrow">What you can request</p>
-          <h2>Eight categories.<br />One unified ticket system.</h2>
-          <p className="cp-section-sub">
-            Anything related to your live project — however big or small — can be raised as a ticket.
-            Our team triages, assigns, and tracks every request from open to close.
-          </p>
-        </div>
-
-        <div className="cp-req-grid">
-          {WHAT_YOU_CAN_REQUEST.map(({ Icon, label, desc }) => (
-            <div key={label} className="cp-req-card" data-card-interactive>
-              <div className="cp-req-card__icon">
-                <Icon size={20} aria-hidden="true" />
-              </div>
-              <h3 className="cp-req-card__label">{label}</h3>
-              <p className="cp-req-card__desc">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════════ */}
       {/* MAIN FORM ZONE                                        */}
       {/* ══════════════════════════════════════════════════════ */}
       <section className="section-shell cp-form-zone" id="submit-ticket">
@@ -590,6 +564,32 @@ export default function ClientPortal() {
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════ */}
+      {/* WHAT YOU CAN REQUEST                                  */}
+      {/* ══════════════════════════════════════════════════════ */}
+      <section className="section-shell cp-what-section" data-reveal>
+        <div className="cp-section-intro">
+          <p className="eyebrow">What you can request</p>
+          <h2>Eight categories.<br />One unified ticket system.</h2>
+          <p className="cp-section-sub">
+            Anything related to your live project — however big or small — can be raised as a ticket.
+            Our team triages, assigns, and tracks every request from open to close.
+          </p>
+        </div>
+
+        <div className="cp-req-grid">
+          {WHAT_YOU_CAN_REQUEST.map(({ Icon, label, desc }) => (
+            <div key={label} className="cp-req-card" data-card-interactive>
+              <div className="cp-req-card__icon">
+                <Icon size={20} aria-hidden="true" />
+              </div>
+              <h3 className="cp-req-card__label">{label}</h3>
+              <p className="cp-req-card__desc">{desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 

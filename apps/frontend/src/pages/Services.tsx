@@ -28,58 +28,66 @@ export default function Services() {
 
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const ctx = gsap.context(() => {
-      const cards = gsap.utils.toArray<HTMLElement>(".service-detail");
-      const HEADER = 88;
+      const mm = gsap.matchMedia();
 
-      cards.forEach((card, i) => {
-        const isLast = i === cards.length - 1;
+      // ── Desktop / tablet (≥861px): full sticky-stack animation ─────────
+      mm.add("(min-width: 861px)", () => {
+        const cards = gsap.utils.toArray<HTMLElement>(".service-detail");
+        const HEADER = 88;
 
-        // ── Pin: freeze each card once it reaches the sticky top ───────
-        if (!isLast) {
+        cards.forEach((card, i) => {
+          if (i === cards.length - 1) return;
+
+          // Pin: freeze each card once it reaches the sticky top
           ScrollTrigger.create({
             trigger: card,
             start: `top ${HEADER}px`,
             endTrigger: ".service-fit",
             end: "top bottom",
             pin: true,
-            pinSpacing: false
+            pinSpacing: false,
+            anticipatePin: 1,
+            invalidateOnRefresh: true
           });
 
-          // ── Scale down as the next card slides up — no opacity change ─
+          // Scale down as the next card slides up — snappier scrub
           gsap.to(card, {
-            scale: 0.9,
+            scale: 0.92,
             ease: "none",
             scrollTrigger: {
               trigger: cards[i + 1],
               start: "top bottom",
               end: `top ${HEADER}px`,
-              scrub: 2
+              scrub: 0.5,
+              invalidateOnRefresh: true
             }
           });
-        }
-
-        // ── Media parallax ──────────────────────────────────────────────
-        const media = card.querySelector<HTMLElement>(".service-detail__media");
-        if (media) {
-          gsap.fromTo(
-            media,
-            { scale: 1.08 },
-            {
-              scale: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: card,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 1.8
-              }
-            }
-          );
-        }
+        });
       });
 
-      // ── Fit-grid entrance ───────────────────────────────────────────────
+      // ── Mobile (<861px): plain stagger entrance, no pinning ────────────
+      mm.add("(max-width: 860px)", () => {
+        gsap.fromTo(
+          ".service-detail",
+          { y: 36, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.7,
+            ease: "expo.out",
+            stagger: 0.12,
+            scrollTrigger: {
+              trigger: ".service-detail-list",
+              start: "top 82%",
+              once: true
+            }
+          }
+        );
+      });
+
+      // ── Fit-grid entrance (all viewports) ──────────────────────────────
       gsap.fromTo(
         ".fit-grid article",
         { y: 36, autoAlpha: 0 },
@@ -93,6 +101,7 @@ export default function Services() {
         }
       );
     }, pageRef);
+
     return () => ctx.revert();
   }, [services]);
 

@@ -7,6 +7,7 @@ import { HorizontalProjects } from "../components/HorizontalProjects";
 import { PlatformMarquee } from "../components/PlatformMarquee";
 import { PlatformShowcase } from "../components/PlatformShowcase";
 import { ProcessRail } from "../components/ProcessRail";
+import { ServiceBelt } from "../components/ServiceBelt";
 import { ServicesPreview } from "../components/ServicesPreview";
 import { Testimonials } from "../components/Testimonials";
 import { fallbackProjects, fallbackServices, platformNames } from "../data/fallback";
@@ -42,6 +43,7 @@ export default function Home() {
         <meta property="og:description" content="Full-service digital studio: marketplace management, Google Ads, social media, website development, UI/UX design, and custom applications for ambitious brands." />
         <meta property="og:url" content="https://nextgenventures.in" />
       </Helmet>
+      <ServiceBelt />
       <Hero />
       <PlatformMarquee items={platformNames} />
       <div className="section-bg-warm">
