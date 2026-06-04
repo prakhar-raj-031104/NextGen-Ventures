@@ -105,6 +105,13 @@ export type TicketPayload = {
   timeline?: string;
 };
 
+export type AddOnEstimate = {
+  label: string;
+  price: string;
+  unit: string;
+  note?: string;
+};
+
 export type ClientAccount = {
   id: string;
   name: string;

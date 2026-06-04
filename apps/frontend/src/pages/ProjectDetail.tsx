@@ -147,6 +147,17 @@ export default function ProjectDetail() {
             </div>
             <h1>{project.title}</h1>
             <p className="pd-hero__client">{project.client}</p>
+            {project.liveUrl && (
+              <a
+                className="pd-hero__live"
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>View Live Site</span>
+                <ExternalLink size={16} aria-hidden="true" />
+              </a>
+            )}
           </div>
         </div>
 

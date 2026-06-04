@@ -1,6 +1,20 @@
-import type { ClientReview, FaqItem, PlatformLink, PricingPlan, Project, Service, ServiceCaseStudy } from "../types";
+import type { AddOnEstimate, ClientReview, FaqItem, PlatformLink, PricingPlan, Project, Service, ServiceCaseStudy } from "../types";
 
 const imageBase = "https://images.unsplash.com";
+
+// ─── ADD-ON ESTIMATES ───────────────────────────────────────────────────────
+// Indicative pricing for additions clients commonly request via the portal.
+// Kept in one place so the Services pages and Client Portal stay consistent.
+export const addOnEstimates: AddOnEstimate[] = [
+  { label: "WhatsApp integration",        price: "₹1,000",      unit: "one-time" },
+  { label: "Payment gateway",             price: "₹1,000",      unit: "one-time" },
+  { label: "Delivery partner integration", price: "₹1,000",     unit: "one-time" },
+  { label: "Social media setup",          price: "₹500",        unit: "per platform" },
+  { label: "Domain registration",         price: "₹1,000",      unit: "per year" },
+  { label: "Course / LMS module",         price: "up to ₹2,500", unit: "per year", note: "Variable as per platform cost" },
+  { label: "Custom add-on module",        price: "up to ₹2,000", unit: "one-time", note: "Charges vary with scope" },
+  { label: "Hosting renewal",             price: "from ₹5,000",  unit: "per 4 years", note: "Free for 3 years on new builds · varies by host cost" }
+];
 
 // ─── MARKETPLACE GROWTH ──────────────────────────────────────────────────────
 
@@ -234,53 +248,65 @@ const uiuxFaq: FaqItem[] = [
 const websitePlans: PricingPlan[] = [
   {
     name: "Starter",
-    price: "₹49,999",
+    price: "₹7,000",
     priceNote: "one-time",
-    description: "A clean, fast brand website — React or WordPress — with the fundamentals done right.",
+    description: "A clean, professional brand website to get your business online — fast and affordable.",
     features: [
-      "Up to 5 pages designed and built",
-      "React + Vite or WordPress stack",
-      "Mobile responsive design",
-      "Contact form with email delivery",
-      "Google Analytics 4 setup",
-      "Basic on-page SEO structure",
+      "Up to 5 responsive pages",
+      "Mobile-first, SEO-ready build",
+      "Free hosting for 3 years",
+      "Domain — ₹1,000 / year",
+      "Contact form + WhatsApp link",
+      "Google Analytics setup",
       "1 month of post-launch support"
     ],
     cta: "Get Started"
   },
   {
-    name: "Pro",
-    price: "₹1,19,999",
+    name: "E-commerce",
+    price: "₹15,000",
     priceNote: "one-time",
-    highlight: true,
-    description: "Motion-rich website with CMS, conversion tracking, performance tuning, and ecommerce-ready structure.",
+    description: "A complete online store with payments, delivery, and WhatsApp ordering built in.",
     features: [
-      "Up to 12 pages designed and built",
-      "React + GSAP or WordPress + Elementor/ACF",
-      "E-commerce integration (Shopify / WooCommerce)",
-      "Headless CMS integration (Sanity / Contentful)",
-      "Advanced SEO — sitemaps, schema, meta",
-      "Conversion event tracking",
-      "Performance score 90+ guaranteed",
-      "Blog or resources section",
-      "3 months of post-launch support"
+      "Everything in Starter",
+      "Product catalogue, cart & checkout",
+      "Free hosting for 3 years",
+      "WhatsApp integration — ₹1,000",
+      "Payment gateway — ₹1,000",
+      "Delivery partner integration — ₹1,000",
+      "Social media setup — ₹500 / platform"
     ],
-    cta: "Start Pro Build"
+    cta: "Launch My Store"
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    description: "Full-scale web platform with custom backend, multi-language support, and dedicated delivery.",
+    name: "Premium",
+    price: "₹25,000",
+    priceNote: "one-time",
+    highlight: true,
+    description: "An advanced platform with custom modules, courses, and integrations — built to scale.",
     features: [
-      "Unlimited pages and sections",
-      "Custom backend and API integrations",
-      "E-commerce or booking flows",
-      "Multi-language support",
-      "Advanced CMS with editorial workflows",
-      "Corporate / enterprise branding system",
-      "CDN and performance infrastructure",
+      "Everything in E-commerce",
+      "Individual course / LMS module — up to ₹2,500 / year (varies by platform)",
+      "Custom add-on modules — up to ₹2,000 (charges vary)",
+      "WhatsApp — ₹1,000 · Payment gateway — ₹1,000",
+      "Social media setup — ₹500 / platform",
+      "Delivery partner — ₹1,000 (if needed)",
+      "Priority post-launch support"
+    ],
+    cta: "Go Premium"
+  },
+  {
+    name: "Corporate",
+    price: "₹50,000+",
+    priceNote: "varies by scope",
+    description: "An enterprise-grade corporate website, scoped and priced to your exact requirements.",
+    features: [
+      "Fully custom design & development",
+      "Scope-based pricing (varies by requirement)",
+      "Hosting — ₹5,000 for 4 years (varies by host cost)",
+      "All integrations available on request",
       "Dedicated project manager",
-      "6 months of post-launch support"
+      "Priority SLA & extended support"
     ],
     cta: "Request a Quote"
   }

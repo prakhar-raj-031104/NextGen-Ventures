@@ -54,17 +54,20 @@ export const HorizontalProjects = ({ projects }: HorizontalProjectsProps) => {
   }, [projects]);
 
   return (
-    <section className="horizontal-projects" ref={sectionRef}>
-      <div className="horizontal-heading" data-reveal="left">
-        <p className="eyebrow">Selected Work</p>
-        <h2>Real case studies. Measurable results.</h2>
-        <Link className="text-link" to="/projects">
-          View all projects
-          <ArrowUpRight size={18} aria-hidden="true" />
-        </Link>
+    <>
+      <div className="horizontal-intro">
+        <div className="horizontal-heading" data-reveal="left">
+          <p className="eyebrow">Selected Work</p>
+          <h2>Real case studies. Measurable results.</h2>
+          <Link className="text-link" to="/projects">
+            View all projects
+            <ArrowUpRight size={18} aria-hidden="true" />
+          </Link>
+        </div>
       </div>
 
-      <div className="project-track" ref={trackRef}>
+      <section className="horizontal-projects" ref={sectionRef}>
+        <div className="project-track" ref={trackRef}>
         {projects.map((project) => (
           <Link
             to={`/projects/${project.slug}`}
@@ -101,9 +104,10 @@ export const HorizontalProjects = ({ projects }: HorizontalProjectsProps) => {
                 </div>
               </div>
             </article>
-          </Link>
-        ))}
-      </div>
-    </section>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </>
   );
 };

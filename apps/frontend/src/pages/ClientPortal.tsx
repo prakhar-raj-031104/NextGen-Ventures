@@ -13,6 +13,8 @@ import {
   EyeOff,
   FileText,
   Globe,
+  IndianRupee,
+  Info,
   KeyRound,
   Layers,
   Lock,
@@ -38,6 +40,7 @@ import { Helmet } from "react-helmet-async";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { api } from "../lib/api";
+import { addOnEstimates } from "../data/fallback";
 import { useClientAuth } from "../hooks/useClientAuth";
 import type { TicketPayload } from "../types";
 
@@ -771,6 +774,34 @@ export default function ClientPortal() {
                   </select>
                 </div>
               </fieldset>
+
+              {/* ── Estimated add-on pricing ─────────────────── */}
+              <div className="cp-estimate">
+                <div className="cp-estimate__head">
+                  <div className="cp-estimate__icon"><IndianRupee size={18} /></div>
+                  <div>
+                    <span className="cp-estimate__title">Estimated add-on pricing</span>
+                    <p className="cp-estimate__hint">Indicative costs for common additions. We'll confirm a final quote on your ticket before any work begins.</p>
+                  </div>
+                </div>
+                <ul className="cp-estimate__list">
+                  {addOnEstimates.map((item) => (
+                    <li key={item.label} className="cp-estimate__row">
+                      <div className="cp-estimate__label">
+                        <span>{item.label}</span>
+                        {item.note && <small>{item.note}</small>}
+                      </div>
+                      <div className="cp-estimate__price">
+                        <strong>{item.price}</strong>
+                        <span>{item.unit}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <p className="cp-estimate__note">
+                  <Info size={13} /> Hosting is free for the first 3 years on new builds. Final pricing varies with scope and platform costs.
+                </p>
+              </div>
 
               {/* ── Submit ───────────────────────────────────── */}
               <div className="cp-form-footer">

@@ -223,8 +223,23 @@ export const usePageAnimations = () => {
         });
     });
 
-    requestAnimationFrame(() => ScrollTrigger.refresh());
+    const refresh = () => ScrollTrigger.refresh();
+    requestAnimationFrame(refresh);
 
-    return () => context.revert();
+    // Re-measure once fonts and images have settled. Pinned / stacked layouts
+    // (services stack, horizontal projects) depend on accurate dimensions, and
+    // those differ across machines until everything has fully loaded — which is
+    // why a layout can look correct on one laptop but overlap on another.
+    if (document.fonts?.ready) {
+      void document.fonts.ready.then(() => requestAnimationFrame(refresh));
+    }
+    window.addEventListener("load", refresh);
+    const settleTimer = window.setTimeout(refresh, 600);
+
+    return () => {
+      window.removeEventListener("load", refresh);
+      window.clearTimeout(settleTimer);
+      context.revert();
+    };
   }, [location.pathname]);
 };
