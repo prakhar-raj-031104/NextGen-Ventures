@@ -16,5 +16,12 @@ export const sendMail = async (to: string, subject: string, text: string): Promi
     console.log(`[mail:dev] to=${to} | ${subject}\n${text}`);
     return;
   }
-  await transporter.sendMail({ from: env.SMTP_FROM ?? env.SMTP_USER, to, subject, text });
+  try {
+    await transporter.sendMail({ from: env.SMTP_FROM ?? env.SMTP_USER, to, subject, text });
+  } catch (err) {
+    // Don't fail the whole request if email delivery fails — log the content
+    // (incl. the OTP / password) so the flow is still usable while SMTP is fixed.
+    console.error(`[mail:error] could not email ${to}:`, err instanceof Error ? err.message : err);
+    console.log(`[mail:fallback] to=${to} | ${subject}\n${text}`);
+  }
 };

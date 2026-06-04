@@ -47,6 +47,8 @@ const normalizeService = (service: Service): Service => {
   const fb = fallbackServices.find((f) => f.slug === service.slug);
   return {
     ...service,
+    // Prefer a local override image (e.g. /web-development.jpg) over the DB value.
+    imageUrl: fb?.imageUrl?.startsWith("/") ? fb.imageUrl : service.imageUrl,
     plans: service.plans ?? fb?.plans,
     faq: service.faq ?? fb?.faq,
     caseStudies: service.caseStudies ?? fb?.caseStudies,

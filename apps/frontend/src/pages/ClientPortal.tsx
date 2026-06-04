@@ -133,6 +133,34 @@ export default function ClientPortal() {
   const [reg, setReg] = useState({ name: "", email: "", company: "", domain: "", mobile: "", dob: "" });
   const [login, setLogin] = useState({ identifier: "", password: "" });
 
+  // Forgot password (OTP) flow
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotStep, setForgotStep] = useState<"request" | "verify" | "done">("request");
+  const [forgot, setForgot] = useState({ email: "", domain: "", dob: "", otp: "" });
+  const [forgotPw, setForgotPw] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [forgotMsg, setForgotMsg] = useState("");
+  const setForgotField = (f: keyof typeof forgot, v: string) => setForgot((p) => ({ ...p, [f]: v }));
+
+  const onForgotRequest = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); setForgotBusy(true); setForgotMsg("");
+    try {
+      await api.forgotRequest({ email: forgot.email, domain: forgot.domain, dob: forgot.dob });
+      setForgotStep("verify");
+      setForgotMsg("If your details match, a 6-digit code has been emailed to you.");
+    } catch (err) { setForgotMsg(err instanceof Error ? err.message : "Unable to send code."); }
+    finally { setForgotBusy(false); }
+  };
+
+  const onForgotVerify = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); setForgotBusy(true); setForgotMsg("");
+    try {
+      const pw = await api.forgotVerify({ email: forgot.email, otp: forgot.otp });
+      setForgotPw(pw); setForgotStep("done");
+    } catch (err) { setForgotMsg(err instanceof Error ? err.message : "Invalid code."); }
+    finally { setForgotBusy(false); }
+  };
+
   const setRegField   = (f: keyof typeof reg, v: string)   => setReg((p) => ({ ...p, [f]: v }));
   const setLoginField = (f: keyof typeof login, v: string) => setLogin((p) => ({ ...p, [f]: v }));
 
@@ -511,9 +539,57 @@ export default function ClientPortal() {
                     {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Signing in…</>) : (<>Sign in <LogIn size={16} /></>)}
                   </button>
                   <p className="cp-auth__switch">
-                    Don't have access yet? <Link to="/contact">Contact us</Link> to get onboarded.
+                    <button type="button" onClick={() => { setForgotOpen((v) => !v); setForgotStep("request"); setForgotMsg(""); }}>
+                      Forgot password?
+                    </button>
+                    {" · "}Don't have access yet? <Link to="/contact">Contact us</Link>.
                   </p>
                 </form>
+
+                {forgotOpen && (
+                  <div className="cp-pw-rule" style={{ marginTop: 8 }}>
+                    {forgotStep === "request" && (
+                      <form className="cp-auth__form" onSubmit={onForgotRequest}>
+                        <div className="cp-pw-rule__top"><KeyRound size={15} /><span>Reset your password</span></div>
+                        <div className="cp-field">
+                          <label htmlFor="fg-email"><Mail size={13} /> Email</label>
+                          <input id="fg-email" required type="email" value={forgot.email} onChange={(e) => setForgotField("email", e.target.value)} placeholder="you@company.com" />
+                        </div>
+                        <div className="cp-field">
+                          <label htmlFor="fg-domain"><Globe size={13} /> Domain</label>
+                          <input id="fg-domain" required value={forgot.domain} onChange={(e) => setForgotField("domain", e.target.value)} placeholder="yourbrand.com" />
+                        </div>
+                        <div className="cp-field">
+                          <label htmlFor="fg-dob"><Calendar size={13} /> Date of Birth</label>
+                          <input id="fg-dob" required type="date" value={forgot.dob} onChange={(e) => setForgotField("dob", e.target.value)} />
+                        </div>
+                        {forgotMsg && <p className="cp-field__hint">{forgotMsg}</p>}
+                        <button className="button button--primary cp-auth__submit" type="submit" disabled={forgotBusy}>
+                          {forgotBusy ? <><RefreshCw size={16} className="spin" /> Sending…</> : <>Send code</>}
+                        </button>
+                      </form>
+                    )}
+                    {forgotStep === "verify" && (
+                      <form className="cp-auth__form" onSubmit={onForgotVerify}>
+                        <div className="cp-pw-rule__top"><KeyRound size={15} /><span>Enter the 6-digit code</span></div>
+                        {forgotMsg && <p className="cp-field__hint">{forgotMsg}</p>}
+                        <div className="cp-field">
+                          <label htmlFor="fg-otp">Verification code</label>
+                          <input id="fg-otp" required maxLength={6} value={forgot.otp} onChange={(e) => setForgotField("otp", e.target.value)} placeholder="123456" />
+                        </div>
+                        <button className="button button--primary cp-auth__submit" type="submit" disabled={forgotBusy}>
+                          {forgotBusy ? <><RefreshCw size={16} className="spin" /> Verifying…</> : <>Verify &amp; get password</>}
+                        </button>
+                      </form>
+                    )}
+                    {forgotStep === "done" && (
+                      <div className="cp-pw-rule__preview">
+                        <span className="cp-pw-rule__label">Your password (also emailed to you)</span>
+                        <code className="cp-pw-rule__value">{forgotPw}</code>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <p className="cp-auth__note"><Lock size={12} /> Credentials are encrypted. Passwords are stored hashed — never in plain text.</p>
               </div>

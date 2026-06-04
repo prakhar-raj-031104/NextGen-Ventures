@@ -122,22 +122,29 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 /** Step 1: verify identity (email + domain + dob) and email a 6-digit OTP. */
 export const forgotRequest = asyncHandler(async (req: Request, res: Response) => {
   const { email, domain, dob } = req.body as { email: string; domain: string; dob: string };
-  const account = await prisma.clientAccount.findFirst({
-    where: { email, domain: normaliseDomain(domain) }
-  });
 
-  const ok = account && account.dob.toISOString().slice(0, 10) === dob;
-  if (ok) {
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
-    otpStore.set(email, { otp, expires: Date.now() + 10 * 60 * 1000 });
-    await sendMail(
-      email,
-      "Your NextGen Ventures password reset code",
-      `Your verification code is ${otp}. It expires in 10 minutes.`
-    );
+  // If the email isn't on file at all, tell the user they're not registered.
+  const byEmail = await prisma.clientAccount.findFirst({ where: { email } });
+  if (!byEmail) {
+    throw new HttpError(404, "This email is not registered. Please contact us to get onboarded.");
   }
-  // Always respond the same way so we don't reveal which accounts exist.
-  sendSuccess(res, { sent: true }, { message: "If the details match, a verification code has been emailed to you." });
+
+  // Email exists — the domain and date of birth must also match.
+  const detailsMatch =
+    byEmail.domain === normaliseDomain(domain) && byEmail.dob.toISOString().slice(0, 10) === dob;
+  if (!detailsMatch) {
+    throw new HttpError(400, "The domain or date of birth doesn't match our records.");
+  }
+
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+  otpStore.set(email, { otp, expires: Date.now() + 10 * 60 * 1000 });
+  await sendMail(
+    email,
+    "Your NextGen Ventures password reset code",
+    `Your verification code is ${otp}. It expires in 10 minutes.`
+  );
+
+  sendSuccess(res, { sent: true }, { message: "A verification code has been emailed to you." });
 });
 
 /** Step 2: verify the OTP and email the account's password to the client. */
