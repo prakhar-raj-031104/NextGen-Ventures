@@ -105,6 +105,38 @@ export type TicketPayload = {
   timeline?: string;
 };
 
+export type ClientAccount = {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  domain: string;
+  mobile: string;
+  dob: string;
+};
+
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  company: string;
+  domain: string;
+  mobile: string;
+  dob: string;
+};
+
+export type LoginPayload = {
+  identifier: string;
+  password: string;
+};
+
+export type AuthSession = {
+  token: string;
+  tokenType: string;
+  account: ClientAccount;
+  // Only present on registration — the one-time generated password.
+  password?: string;
+};
+
 export type InternshipPayload = {
   name: string;
   email: string;

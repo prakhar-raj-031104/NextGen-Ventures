@@ -36,7 +36,8 @@ export const createTicket = asyncHandler(async (req: Request, res: Response) => 
       priority:    body.priority ?? "NORMAL",
       title:       body.title,
       description: body.description,
-      timeline:    body.timeline || null
+      timeline:    body.timeline || null,
+      accountId:   req.account?.sub ?? null
     }
   });
 

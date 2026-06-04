@@ -5854,6 +5854,160 @@ textarea {
   color: #ff8080; font-size: 0.86rem; font-weight: 600;
 }
 
+/* ══════════════════════════════════════════════════════════ */
+/* AUTH GATE (register / login)                                */
+/* ══════════════════════════════════════════════════════════ */
+.cp-auth {
+  display: flex; flex-direction: column; gap: 24px;
+  padding: 36px; border: 1px solid var(--line); border-radius: 22px;
+  background: var(--panel);
+}
+
+.cp-auth__head { display: flex; gap: 16px; align-items: flex-start; }
+
+.cp-auth__icon {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; border-radius: 12px;
+  background: rgba(255, 106, 26, 0.16); color: var(--orange);
+}
+
+.cp-auth__title {
+  margin: 0 0 6px; font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  font-weight: 900; color: var(--white);
+}
+
+.cp-auth__sub { margin: 0; font-size: 0.88rem; line-height: 1.6; color: var(--muted); }
+
+.cp-auth__tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  padding: 6px; border: 1px solid var(--line); border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cp-auth__tab {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+  background: transparent; color: var(--muted);
+  font-size: 0.88rem; font-weight: 800;
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.cp-auth__tab--active { background: rgba(255, 106, 26, 0.16); color: var(--orange); }
+.cp-auth__tab:not(.cp-auth__tab--active):hover { color: var(--white); }
+
+.cp-auth__form { display: grid; gap: 18px; }
+
+.cp-auth__submit { width: 100%; justify-content: center; margin-top: 4px; }
+
+.cp-auth__switch { margin: 0; text-align: center; font-size: 0.84rem; color: var(--muted); }
+.cp-auth__switch button {
+  background: none; border: none; cursor: pointer; padding: 0;
+  color: var(--orange); font-weight: 800; font-size: 0.84rem;
+}
+.cp-auth__switch button:hover { text-decoration: underline; }
+
+.cp-auth__note {
+  display: flex; align-items: center; gap: 7px; justify-content: center;
+  margin: 0; font-size: 0.76rem; color: var(--muted);
+}
+.cp-auth__note svg { color: var(--orange); }
+
+/* Password input with show/hide */
+.cp-pw-input { position: relative; }
+.cp-pw-input input { width: 100%; padding-right: 46px; }
+.cp-pw-input__toggle {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border: none; border-radius: 8px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+.cp-pw-input__toggle:hover { color: var(--white); background: rgba(255, 255, 255, 0.06); }
+
+/* Password rule explainer */
+.cp-pw-rule {
+  display: grid; gap: 10px; padding: 18px;
+  border: 1px dashed rgba(255, 106, 26, 0.35); border-radius: 14px;
+  background: rgba(255, 106, 26, 0.04);
+}
+.cp-pw-rule__top {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; font-weight: 800; color: var(--orange);
+}
+.cp-pw-rule__desc { margin: 0; font-size: 0.8rem; line-height: 1.6; color: var(--muted); }
+.cp-pw-rule__desc code {
+  padding: 1px 6px; border-radius: 5px; background: rgba(255, 255, 255, 0.08);
+  font-size: 0.76rem; color: var(--white);
+}
+.cp-pw-rule__preview {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding-top: 8px; border-top: 1px solid rgba(255, 106, 26, 0.18);
+}
+.cp-pw-rule__label { font-size: 0.74rem; font-weight: 700; color: var(--muted); }
+.cp-pw-rule__value {
+  font-family: monospace; font-size: 1rem; font-weight: 800;
+  letter-spacing: 0.04em; color: var(--white);
+  padding: 4px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.06);
+}
+
+/* One-time credential reveal */
+.cp-cred-reveal {
+  display: flex; gap: 18px; align-items: flex-start;
+  padding: 24px; margin-bottom: 28px;
+  border: 1px solid rgba(54, 245, 162, 0.35); border-radius: 18px;
+  background: linear-gradient(160deg, rgba(54, 245, 162, 0.07), var(--panel));
+}
+.cp-cred-reveal__icon {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; border-radius: 50%;
+  background: rgba(54, 245, 162, 0.14); color: #36f5a2;
+}
+.cp-cred-reveal__body { display: grid; gap: 8px; }
+.cp-cred-reveal__body strong { font-size: 1.02rem; color: var(--white); }
+.cp-cred-reveal__body p { margin: 0; font-size: 0.84rem; line-height: 1.6; color: var(--muted); }
+.cp-cred-reveal__value {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 4px 0;
+}
+.cp-cred-reveal__value code {
+  font-family: monospace; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.05em;
+  color: #36f5a2; padding: 6px 14px; border-radius: 10px;
+  background: rgba(54, 245, 162, 0.1); border: 1px solid rgba(54, 245, 162, 0.25);
+}
+.cp-cred-reveal__dismiss {
+  display: inline-flex; align-items: center; gap: 7px; justify-self: start;
+  margin-top: 4px; padding: 9px 16px; cursor: pointer;
+  border: 1px solid rgba(54, 245, 162, 0.35); border-radius: 10px;
+  background: rgba(54, 245, 162, 0.08); color: #36f5a2;
+  font-size: 0.82rem; font-weight: 800;
+  transition: background 160ms ease;
+}
+.cp-cred-reveal__dismiss:hover { background: rgba(54, 245, 162, 0.16); }
+
+/* Signed-in account bar */
+.cp-account-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; padding: 16px 20px; margin-bottom: 28px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.cp-account-bar__who { display: flex; align-items: center; gap: 12px; }
+.cp-account-bar__avatar {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 10px;
+  background: rgba(54, 245, 162, 0.12); color: #36f5a2;
+}
+.cp-account-bar__who strong { display: block; font-size: 0.92rem; color: var(--white); }
+.cp-account-bar__who span { display: block; font-size: 0.78rem; color: var(--muted); word-break: break-word; }
+.cp-account-bar__logout {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 15px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: transparent; color: var(--muted);
+  font-size: 0.82rem; font-weight: 800;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+.cp-account-bar__logout:hover { border-color: rgba(255, 77, 77, 0.4); color: #ff8080; }
+
 /* ── Confirmation card ──────────────────────────────────── */
 .cp-confirm {
   position: relative; overflow: hidden;

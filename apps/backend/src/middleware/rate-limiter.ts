@@ -43,6 +43,18 @@ export const ticketRateLimiter = rateLimit({
   }
 });
 
+// 20 auth attempts (register/login) per IP per 15 minutes — throttles brute force
+export const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? "unknown"),
+  handler(_req, res) {
+    res.status(429).json(rateLimitResponse(900));
+  }
+});
+
 // 5 internship applications per IP per day
 export const internshipRateLimiter = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,

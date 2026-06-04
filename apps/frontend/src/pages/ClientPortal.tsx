@@ -1,28 +1,35 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import {
   AlertCircle,
   ArrowRight,
   ArrowUpRight,
+  AtSign,
+  Calendar,
   CheckCircle2,
   Clock,
-  Code2,
   Copy,
+  Eye,
+  EyeOff,
   FileText,
   Globe,
+  KeyRound,
   Layers,
   Lock,
+  LogIn,
+  LogOut,
+  Mail,
   MessageSquare,
-  Monitor,
   Palette,
+  Phone,
   RefreshCw,
   Send,
   ShieldCheck,
-  ShoppingBag,
   Sparkles,
   Star,
   Ticket,
   TrendingUp,
+  UserPlus,
   Users,
   Zap
 } from "lucide-react";
@@ -31,6 +38,7 @@ import { Helmet } from "react-helmet-async";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { api } from "../lib/api";
+import { useClientAuth } from "../hooks/useClientAuth";
 import type { TicketPayload } from "../types";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -106,10 +114,90 @@ export default function ClientPortal() {
   const [errorMsg, setErrorMsg]   = useState("");
   const [ticketNumber, setTicketNumber] = useState("");
   const [copied, setCopied]       = useState(false);
-  const [activeSection, setActiveSection] = useState(0);
 
   const set = (field: keyof TicketPayload, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  /* ── Authentication ──────────────────────────────────────── */
+  const auth = useClientAuth();
+  const [authMode, setAuthMode]   = useState<"register" | "login">("register");
+  const [authStatus, setAuthStatus] = useState<"idle" | "working">("idle");
+  const [authError, setAuthError]   = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [genPassword, setGenPassword]   = useState("");   // one-time generated password
+  const [pwCopied, setPwCopied]         = useState(false);
+
+  const [reg, setReg] = useState({ name: "", email: "", company: "", domain: "", mobile: "", dob: "" });
+  const [login, setLogin] = useState({ identifier: "", password: "" });
+
+  const setRegField   = (f: keyof typeof reg, v: string)   => setReg((p) => ({ ...p, [f]: v }));
+  const setLoginField = (f: keyof typeof login, v: string) => setLogin((p) => ({ ...p, [f]: v }));
+
+  // Live preview of the password rule so the client understands how it's derived.
+  const passwordPreview = (() => {
+    const host = reg.domain.trim().toLowerCase()
+      .replace(/^[a-z]+:\/\//, "").replace(/^www\./, "").replace(/[/?#].*$/, "");
+    const letters = (host.match(/[a-z0-9]/g) ?? []).join("");
+    if (!letters && !reg.dob) return "";
+    const stub = (letters.slice(0, 4) || "····").padEnd(4, "·");
+    const capped = stub.charAt(0).toUpperCase() + stub.slice(1);
+    const [y, m, d] = reg.dob ? reg.dob.split("-") : ["", "", ""];
+    const dobPart = reg.dob ? `${d}${m}${y}` : "DDMMYYYY";
+    return `${capped}${dobPart}`;
+  })();
+
+  const onRegister = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAuthStatus("working");
+    setAuthError("");
+    try {
+      const password = await auth.register(reg);
+      if (password) setGenPassword(password);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Unable to create your account.");
+    } finally {
+      setAuthStatus("idle");
+    }
+  };
+
+  const onLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setAuthStatus("working");
+    setAuthError("");
+    try {
+      await auth.login(login);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Unable to sign in.");
+    } finally {
+      setAuthStatus("idle");
+    }
+  };
+
+  const copyPassword = () => {
+    void navigator.clipboard.writeText(genPassword);
+    setPwCopied(true);
+    setTimeout(() => setPwCopied(false), 2200);
+  };
+
+  // Prefill the ticket form from the signed-in account so clients don't retype it.
+  useEffect(() => {
+    if (!auth.account) return;
+    setForm((prev) => ({
+      ...prev,
+      clientName: prev.clientName || auth.account!.name,
+      email:      prev.email      || auth.account!.email,
+      company:    prev.company    || auth.account!.company,
+      projectRef: prev.projectRef || auth.account!.domain
+    }));
+  }, [auth.account]);
+
+  const handleLogout = () => {
+    auth.logout();
+    setGenPassword("");
+    setLogin({ identifier: "", password: "" });
+    setReg({ name: "", email: "", company: "", domain: "", mobile: "", dob: "" });
+    setAuthMode("login");
+  };
 
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -169,10 +257,15 @@ export default function ClientPortal() {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!auth.token) {
+      setStatus("error");
+      setErrorMsg("Your session has expired. Please sign in again.");
+      return;
+    }
     setStatus("sending");
     setErrorMsg("");
     try {
-      const res = await api.submitTicket(form);
+      const res = await api.submitTicket(form, auth.token);
       setTicketNumber(res.data.ticketNumber);
       setStatus("success");
 
@@ -378,6 +471,175 @@ export default function ClientPortal() {
           {/* ── FORM ────────────────────────────────────────── */}
           <div className="cp-form-container">
 
+            {/* ══════════════════════════════════════════════════ */}
+            {/* AUTH GATE — register / login before raising tickets */}
+            {/* ══════════════════════════════════════════════════ */}
+            {!auth.account ? (
+              <div className="cp-auth">
+                <div className="cp-auth__head">
+                  <div className="cp-auth__icon"><KeyRound size={22} /></div>
+                  <div>
+                    <h2 className="cp-auth__title">Client portal access</h2>
+                    <p className="cp-auth__sub">
+                      {authMode === "register"
+                        ? "Set up your secure access. Your portal password is generated automatically from your details."
+                        : "Sign in with your registered email or domain and your portal password."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="cp-auth__tabs" role="tablist">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={authMode === "register"}
+                    className={`cp-auth__tab ${authMode === "register" ? "cp-auth__tab--active" : ""}`}
+                    onClick={() => { setAuthMode("register"); setAuthError(""); }}
+                  >
+                    <UserPlus size={16} /> Create access
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={authMode === "login"}
+                    className={`cp-auth__tab ${authMode === "login" ? "cp-auth__tab--active" : ""}`}
+                    onClick={() => { setAuthMode("login"); setAuthError(""); }}
+                  >
+                    <LogIn size={16} /> Sign in
+                  </button>
+                </div>
+
+                {authMode === "register" ? (
+                  /* ── REGISTER ───────────────────────────────── */
+                  <form className="cp-auth__form" onSubmit={onRegister}>
+                    <div className="cp-field-grid-2">
+                      <div className="cp-field">
+                        <label htmlFor="rg-name">Full Name <span className="required-mark">*</span></label>
+                        <input id="rg-name" required minLength={2} value={reg.name} onChange={(e) => setRegField("name", e.target.value)} placeholder="Your full name" />
+                      </div>
+                      <div className="cp-field">
+                        <label htmlFor="rg-email"><Mail size={13} /> Work Email <span className="required-mark">*</span></label>
+                        <input id="rg-email" required type="email" value={reg.email} onChange={(e) => setRegField("email", e.target.value)} placeholder="you@company.com" />
+                      </div>
+                    </div>
+
+                    <div className="cp-field">
+                      <label htmlFor="rg-company">Company / Brand <span className="required-mark">*</span></label>
+                      <input id="rg-company" required minLength={2} value={reg.company} onChange={(e) => setRegField("company", e.target.value)} placeholder="The company or brand we work on" />
+                    </div>
+
+                    <div className="cp-field-grid-2">
+                      <div className="cp-field">
+                        <label htmlFor="rg-domain"><Globe size={13} /> Application Domain <span className="required-mark">*</span></label>
+                        <input id="rg-domain" required value={reg.domain} onChange={(e) => setRegField("domain", e.target.value)} placeholder="yourbrand.com" />
+                        <span className="cp-field__hint">The website or app domain we built for you.</span>
+                      </div>
+                      <div className="cp-field">
+                        <label htmlFor="rg-mobile"><Phone size={13} /> Mobile Number <span className="required-mark">*</span></label>
+                        <input id="rg-mobile" required type="tel" value={reg.mobile} onChange={(e) => setRegField("mobile", e.target.value)} placeholder="+91 98765 43210" />
+                      </div>
+                    </div>
+
+                    <div className="cp-field">
+                      <label htmlFor="rg-dob"><Calendar size={13} /> Date of Birth <span className="required-mark">*</span></label>
+                      <input id="rg-dob" required type="date" max="2015-01-01" value={reg.dob} onChange={(e) => setRegField("dob", e.target.value)} />
+                    </div>
+
+                    {/* Password rule explainer */}
+                    <div className="cp-pw-rule">
+                      <div className="cp-pw-rule__top">
+                        <KeyRound size={15} />
+                        <span>How your password is generated</span>
+                      </div>
+                      <p className="cp-pw-rule__desc">
+                        First 4 letters of your domain <strong>+</strong> your date of birth as <code>DDMMYYYY</code>.
+                        You can change it later — keep it safe for future logins.
+                      </p>
+                      <div className="cp-pw-rule__preview">
+                        <span className="cp-pw-rule__label">Your password will be</span>
+                        <code className="cp-pw-rule__value">{passwordPreview || "————————"}</code>
+                      </div>
+                    </div>
+
+                    {authError && <p className="cp-form-error"><AlertCircle size={15} /> {authError}</p>}
+
+                    <button className="button button--primary cp-auth__submit" type="submit" disabled={authStatus === "working"}>
+                      {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Creating access…</>) : (<>Create my access <ArrowRight size={16} /></>)}
+                    </button>
+                    <p className="cp-auth__switch">
+                      Already have access?{" "}
+                      <button type="button" onClick={() => { setAuthMode("login"); setAuthError(""); }}>Sign in</button>
+                    </p>
+                  </form>
+                ) : (
+                  /* ── LOGIN ──────────────────────────────────── */
+                  <form className="cp-auth__form" onSubmit={onLogin}>
+                    <div className="cp-field">
+                      <label htmlFor="lg-id"><AtSign size={13} /> Email or Domain <span className="required-mark">*</span></label>
+                      <input id="lg-id" required value={login.identifier} onChange={(e) => setLoginField("identifier", e.target.value)} placeholder="you@company.com or yourbrand.com" />
+                    </div>
+                    <div className="cp-field">
+                      <label htmlFor="lg-pw"><KeyRound size={13} /> Portal Password <span className="required-mark">*</span></label>
+                      <div className="cp-pw-input">
+                        <input id="lg-pw" required type={showPassword ? "text" : "password"} value={login.password} onChange={(e) => setLoginField("password", e.target.value)} placeholder="Your portal password" />
+                        <button type="button" className="cp-pw-input__toggle" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {authError && <p className="cp-form-error"><AlertCircle size={15} /> {authError}</p>}
+
+                    <button className="button button--primary cp-auth__submit" type="submit" disabled={authStatus === "working"}>
+                      {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Signing in…</>) : (<>Sign in <LogIn size={16} /></>)}
+                    </button>
+                    <p className="cp-auth__switch">
+                      New here?{" "}
+                      <button type="button" onClick={() => { setAuthMode("register"); setAuthError(""); }}>Create access</button>
+                    </p>
+                  </form>
+                )}
+
+                <p className="cp-auth__note"><Lock size={12} /> Credentials are encrypted. Passwords are stored hashed — never in plain text.</p>
+              </div>
+            ) : (
+            <>
+            {/* One-time generated-password reveal (after registration) */}
+            {genPassword && (
+              <div className="cp-cred-reveal">
+                <div className="cp-cred-reveal__icon"><CheckCircle2 size={26} /></div>
+                <div className="cp-cred-reveal__body">
+                  <strong>Your portal password</strong>
+                  <p>Save this now — you'll use it (with your email or domain) for every future login.</p>
+                  <div className="cp-cred-reveal__value">
+                    <code>{genPassword}</code>
+                    <button type="button" className="cp-copy-btn" onClick={copyPassword} aria-label="Copy password">
+                      {pwCopied ? <CheckCircle2 size={15} /> : <Copy size={15} />}
+                      {pwCopied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <button type="button" className="cp-cred-reveal__dismiss" onClick={() => setGenPassword("")}>
+                    I've saved it — continue <ArrowRight size={14} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Signed-in account bar */}
+            <div className="cp-account-bar">
+              <div className="cp-account-bar__who">
+                <div className="cp-account-bar__avatar"><ShieldCheck size={18} /></div>
+                <div>
+                  <strong>{auth.account.name}</strong>
+                  <span>{auth.account.domain} · {auth.account.email}</span>
+                </div>
+              </div>
+              <button type="button" className="cp-account-bar__logout" onClick={handleLogout}>
+                <LogOut size={15} /> Sign out
+              </button>
+            </div>
+
             {/* Form header */}
             <div className="cp-form-header">
               <h2 className="cp-form-header__title">Submit a request ticket</h2>
@@ -563,6 +825,8 @@ export default function ClientPortal() {
                 <ArrowRight size={15} aria-hidden="true" />
               </a>
             </div>
+            </>
+            )}
           </div>
         </div>
       </section>

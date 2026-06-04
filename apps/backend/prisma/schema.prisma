@@ -65,22 +65,41 @@ enum LeadStatus {
   CLOSED
 }
 
+model ClientAccount {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  company      String
+  domain       String         @unique
+  mobile       String
+  dob          DateTime       @db.Date
+  passwordHash String
+  lastLoginAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  tickets      ClientTicket[]
+}
+
 model ClientTicket {
-  id           String       @id @default(cuid())
-  ticketNumber String       @unique
+  id           String         @id @default(cuid())
+  ticketNumber String         @unique
   clientName   String
   email        String
   company      String
   projectRef   String
   serviceType  String
   requestType  String
-  priority     String       @default("NORMAL")
+  priority     String         @default("NORMAL")
   title        String
   description  String
   timeline     String?
-  status       TicketStatus @default(OPEN)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  status       TicketStatus   @default(OPEN)
+  accountId    String?
+  account      ClientAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([accountId])
 }
 
 enum TicketStatus {

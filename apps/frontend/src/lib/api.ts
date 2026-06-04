@@ -1,5 +1,15 @@
 import { fallbackProjects, fallbackServices } from "../data/fallback";
-import type { InternshipPayload, LeadPayload, Project, Service, TicketPayload } from "../types";
+import type {
+  AuthSession,
+  ClientAccount,
+  InternshipPayload,
+  LeadPayload,
+  LoginPayload,
+  Project,
+  RegisterPayload,
+  Service,
+  TicketPayload
+} from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
 
@@ -67,14 +77,50 @@ export const api = {
     return body;
   },
 
-  async submitTicket(payload: TicketPayload) {
-    const response = await fetch(`${API_URL}/tickets`, {
+  async register(payload: RegisterPayload): Promise<ApiResponse<AuthSession>> {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const body = (await response.json()) as ApiResponse<{ ticketNumber: string; id: string }>;
-    if (!response.ok) throw new Error(body.message ?? "Unable to submit your request");
+    const body = (await response.json()) as ApiResponse<AuthSession> & { error?: { message: string } };
+    if (!response.ok) throw new Error(body.error?.message ?? body.message ?? "Unable to create your account");
+    return body;
+  },
+
+  async login(payload: LoginPayload): Promise<ApiResponse<AuthSession>> {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const body = (await response.json()) as ApiResponse<AuthSession> & { error?: { message: string } };
+    if (!response.ok) throw new Error(body.error?.message ?? body.message ?? "Unable to sign in");
+    return body;
+  },
+
+  async getMe(token: string): Promise<ClientAccount> {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("Session expired");
+    const body = (await response.json()) as ApiResponse<{ account: ClientAccount }>;
+    return body.data.account;
+  },
+
+  async submitTicket(payload: TicketPayload, token: string) {
+    const response = await fetch(`${API_URL}/tickets`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+    const body = (await response.json()) as ApiResponse<{ ticketNumber: string; id: string }> & {
+      error?: { message: string };
+    };
+    if (!response.ok) throw new Error(body.error?.message ?? body.message ?? "Unable to submit your request");
     return body;
   },
 

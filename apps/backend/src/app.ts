@@ -34,7 +34,7 @@ export const createApp = () => {
       },
       credentials: true,
       methods: ["GET", "POST", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "X-Request-Id"]
+      allowedHeaders: ["Content-Type", "X-Request-Id", "Authorization"]
     })
   );
 

@@ -11,7 +11,10 @@ const envSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   LEAD_RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60 * 60 * 1000), // 1 hour
   LEAD_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(10),
-  UPLOAD_DIR: z.string().optional()
+  UPLOAD_DIR: z.string().optional(),
+  // Client portal authentication
+  AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters").default("ngv-dev-secret-change-me-in-production"),
+  AUTH_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(24 * 7) // 7 days
 });
 
 const result = envSchema.safeParse(process.env);
@@ -25,6 +28,12 @@ if (!result.success) {
 }
 
 export const env = result.data;
+
+// Refuse to boot in production with the insecure default signing secret.
+if (env.NODE_ENV === "production" && env.AUTH_SECRET === "ngv-dev-secret-change-me-in-production") {
+  console.error("❌  AUTH_SECRET must be set to a strong, unique value in production.");
+  process.exit(1);
+}
 
 export const corsOrigins = env.CORS_ORIGIN.split(",")
   .map((o) => o.trim())
