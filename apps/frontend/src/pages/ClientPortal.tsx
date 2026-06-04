@@ -484,125 +484,36 @@ export default function ClientPortal() {
                   <div>
                     <h2 className="cp-auth__title">Client portal access</h2>
                     <p className="cp-auth__sub">
-                      {authMode === "register"
-                        ? "Set up your secure access. Your portal password is generated automatically from your details."
-                        : "Sign in with your registered email or domain and your portal password."}
+                      Sign in with your registered email or domain and the portal password we shared with you.
                     </p>
                   </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="cp-auth__tabs" role="tablist">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={authMode === "register"}
-                    className={`cp-auth__tab ${authMode === "register" ? "cp-auth__tab--active" : ""}`}
-                    onClick={() => { setAuthMode("register"); setAuthError(""); }}
-                  >
-                    <UserPlus size={16} /> Create access
+                {/* ── LOGIN ──────────────────────────────────── */}
+                <form className="cp-auth__form" onSubmit={onLogin}>
+                  <div className="cp-field">
+                    <label htmlFor="lg-id"><AtSign size={13} /> Email or Domain <span className="required-mark">*</span></label>
+                    <input id="lg-id" required value={login.identifier} onChange={(e) => setLoginField("identifier", e.target.value)} placeholder="you@company.com or yourbrand.com" />
+                  </div>
+                  <div className="cp-field">
+                    <label htmlFor="lg-pw"><KeyRound size={13} /> Portal Password <span className="required-mark">*</span></label>
+                    <div className="cp-pw-input">
+                      <input id="lg-pw" required type={showPassword ? "text" : "password"} value={login.password} onChange={(e) => setLoginField("password", e.target.value)} placeholder="The password we shared with you" />
+                      <button type="button" className="cp-pw-input__toggle" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {authError && <p className="cp-form-error"><AlertCircle size={15} /> {authError}</p>}
+
+                  <button className="button button--primary cp-auth__submit" type="submit" disabled={authStatus === "working"}>
+                    {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Signing in…</>) : (<>Sign in <LogIn size={16} /></>)}
                   </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={authMode === "login"}
-                    className={`cp-auth__tab ${authMode === "login" ? "cp-auth__tab--active" : ""}`}
-                    onClick={() => { setAuthMode("login"); setAuthError(""); }}
-                  >
-                    <LogIn size={16} /> Sign in
-                  </button>
-                </div>
-
-                {authMode === "register" ? (
-                  /* ── REGISTER ───────────────────────────────── */
-                  <form className="cp-auth__form" onSubmit={onRegister}>
-                    <div className="cp-field-grid-2">
-                      <div className="cp-field">
-                        <label htmlFor="rg-name">Full Name <span className="required-mark">*</span></label>
-                        <input id="rg-name" required minLength={2} value={reg.name} onChange={(e) => setRegField("name", e.target.value)} placeholder="Your full name" />
-                      </div>
-                      <div className="cp-field">
-                        <label htmlFor="rg-email"><Mail size={13} /> Work Email <span className="required-mark">*</span></label>
-                        <input id="rg-email" required type="email" value={reg.email} onChange={(e) => setRegField("email", e.target.value)} placeholder="you@company.com" />
-                      </div>
-                    </div>
-
-                    <div className="cp-field">
-                      <label htmlFor="rg-company">Company / Brand <span className="required-mark">*</span></label>
-                      <input id="rg-company" required minLength={2} value={reg.company} onChange={(e) => setRegField("company", e.target.value)} placeholder="The company or brand we work on" />
-                    </div>
-
-                    <div className="cp-field-grid-2">
-                      <div className="cp-field">
-                        <label htmlFor="rg-domain"><Globe size={13} /> Application Domain <span className="required-mark">*</span></label>
-                        <input id="rg-domain" required value={reg.domain} onChange={(e) => setRegField("domain", e.target.value)} placeholder="yourbrand.com" />
-                        <span className="cp-field__hint">The website or app domain we built for you.</span>
-                      </div>
-                      <div className="cp-field">
-                        <label htmlFor="rg-mobile"><Phone size={13} /> Mobile Number <span className="required-mark">*</span></label>
-                        <input id="rg-mobile" required type="tel" value={reg.mobile} onChange={(e) => setRegField("mobile", e.target.value)} placeholder="+91 98765 43210" />
-                      </div>
-                    </div>
-
-                    <div className="cp-field">
-                      <label htmlFor="rg-dob"><Calendar size={13} /> Date of Birth <span className="required-mark">*</span></label>
-                      <input id="rg-dob" required type="date" max="2015-01-01" value={reg.dob} onChange={(e) => setRegField("dob", e.target.value)} />
-                    </div>
-
-                    {/* Password rule explainer */}
-                    <div className="cp-pw-rule">
-                      <div className="cp-pw-rule__top">
-                        <KeyRound size={15} />
-                        <span>How your password is generated</span>
-                      </div>
-                      <p className="cp-pw-rule__desc">
-                        First 4 letters of your domain <strong>+</strong> your date of birth as <code>DDMMYYYY</code>.
-                        You can change it later — keep it safe for future logins.
-                      </p>
-                      <div className="cp-pw-rule__preview">
-                        <span className="cp-pw-rule__label">Your password will be</span>
-                        <code className="cp-pw-rule__value">{passwordPreview || "————————"}</code>
-                      </div>
-                    </div>
-
-                    {authError && <p className="cp-form-error"><AlertCircle size={15} /> {authError}</p>}
-
-                    <button className="button button--primary cp-auth__submit" type="submit" disabled={authStatus === "working"}>
-                      {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Creating access…</>) : (<>Create my access <ArrowRight size={16} /></>)}
-                    </button>
-                    <p className="cp-auth__switch">
-                      Already have access?{" "}
-                      <button type="button" onClick={() => { setAuthMode("login"); setAuthError(""); }}>Sign in</button>
-                    </p>
-                  </form>
-                ) : (
-                  /* ── LOGIN ──────────────────────────────────── */
-                  <form className="cp-auth__form" onSubmit={onLogin}>
-                    <div className="cp-field">
-                      <label htmlFor="lg-id"><AtSign size={13} /> Email or Domain <span className="required-mark">*</span></label>
-                      <input id="lg-id" required value={login.identifier} onChange={(e) => setLoginField("identifier", e.target.value)} placeholder="you@company.com or yourbrand.com" />
-                    </div>
-                    <div className="cp-field">
-                      <label htmlFor="lg-pw"><KeyRound size={13} /> Portal Password <span className="required-mark">*</span></label>
-                      <div className="cp-pw-input">
-                        <input id="lg-pw" required type={showPassword ? "text" : "password"} value={login.password} onChange={(e) => setLoginField("password", e.target.value)} placeholder="Your portal password" />
-                        <button type="button" className="cp-pw-input__toggle" onClick={() => setShowPassword((s) => !s)} aria-label={showPassword ? "Hide password" : "Show password"}>
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {authError && <p className="cp-form-error"><AlertCircle size={15} /> {authError}</p>}
-
-                    <button className="button button--primary cp-auth__submit" type="submit" disabled={authStatus === "working"}>
-                      {authStatus === "working" ? (<><RefreshCw size={17} className="spin" /> Signing in…</>) : (<>Sign in <LogIn size={16} /></>)}
-                    </button>
-                    <p className="cp-auth__switch">
-                      New here?{" "}
-                      <button type="button" onClick={() => { setAuthMode("register"); setAuthError(""); }}>Create access</button>
-                    </p>
-                  </form>
-                )}
+                  <p className="cp-auth__switch">
+                    Don't have access yet? <Link to="/contact">Contact us</Link> to get onboarded.
+                  </p>
+                </form>
 
                 <p className="cp-auth__note"><Lock size={12} /> Credentials are encrypted. Passwords are stored hashed — never in plain text.</p>
               </div>

@@ -499,6 +499,7 @@ function ClientsView({ rows, token, onCreated }: { rows: AdminClient[]; token: s
                 <span><strong>{c.name}</strong></span>
                 <span><a href={`mailto:${c.email}`}>{c.email}</a> · {c.mobile}</span>
                 <span>{c.domain}</span>
+                {c.password && <span>Password: <code className="adm-pw">{c.password}</code></span>}
                 <span className="adm-card__date">
                   Joined {fmtDate(c.createdAt)}{c.lastLoginAt ? ` · last login ${fmtDate(c.lastLoginAt)}` : ""}
                 </span>

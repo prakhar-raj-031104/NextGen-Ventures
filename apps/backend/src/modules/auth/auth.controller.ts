@@ -5,7 +5,11 @@ import { asyncHandler } from "../../utils/async-handler.js";
 import { HttpError } from "../../utils/http-error.js";
 import { deriveClientPassword, hashPassword, normaliseDomain, verifyPassword } from "./password.js";
 import { signToken } from "./token.js";
+import { sendMail } from "../../utils/mailer.js";
 import type { LoginInput, RegisterInput } from "./auth.schema.js";
+
+// In-memory OTP store (email → { otp, expires }). 10-minute TTL.
+const otpStore = new Map<string, { otp: string; expires: number }>();
 
 const TOKEN_TYPE = "Bearer";
 
@@ -113,6 +117,45 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     tokenType: TOKEN_TYPE,
     account: publicAccount(account)
   });
+});
+
+/** Step 1: verify identity (email + domain + dob) and email a 6-digit OTP. */
+export const forgotRequest = asyncHandler(async (req: Request, res: Response) => {
+  const { email, domain, dob } = req.body as { email: string; domain: string; dob: string };
+  const account = await prisma.clientAccount.findFirst({
+    where: { email, domain: normaliseDomain(domain) }
+  });
+
+  const ok = account && account.dob.toISOString().slice(0, 10) === dob;
+  if (ok) {
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    otpStore.set(email, { otp, expires: Date.now() + 10 * 60 * 1000 });
+    await sendMail(
+      email,
+      "Your NextGen Ventures password reset code",
+      `Your verification code is ${otp}. It expires in 10 minutes.`
+    );
+  }
+  // Always respond the same way so we don't reveal which accounts exist.
+  sendSuccess(res, { sent: true }, { message: "If the details match, a verification code has been emailed to you." });
+});
+
+/** Step 2: verify the OTP and email the account's password to the client. */
+export const forgotVerify = asyncHandler(async (req: Request, res: Response) => {
+  const { email, otp } = req.body as { email: string; otp: string };
+  const entry = otpStore.get(email);
+  if (!entry || entry.expires < Date.now() || entry.otp !== otp) {
+    throw new HttpError(400, "Invalid or expired verification code.");
+  }
+  otpStore.delete(email);
+
+  const account = await prisma.clientAccount.findFirst({ where: { email } });
+  if (!account || !account.password) {
+    throw new HttpError(404, "No password on file. Please contact us to reset your access.");
+  }
+
+  await sendMail(email, "Your NextGen Ventures portal password", `Your portal password is: ${account.password}`);
+  sendSuccess(res, { password: account.password }, { message: "Verified. Your password has been sent to your email." });
 });
 
 /** Return the currently authenticated account (from a valid bearer token). */

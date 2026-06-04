@@ -9,7 +9,8 @@ const navItems = [
   { label: "Projects", href: "/projects" },
   { label: "Internship", href: "/internship" },
   { label: "Contact", href: "/contact" },
-  { label: "Client Portal", href: "/client-portal" }
+  { label: "Client Portal", href: "/client-portal" },
+  { label: "Admin", href: "/admin" }
 ];
 
 export const Header = () => {

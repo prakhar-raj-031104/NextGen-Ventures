@@ -155,7 +155,7 @@ export const listClients = asyncHandler(async (_req: Request, res: Response) => 
     orderBy: { createdAt: "desc" },
     select: {
       id: true, name: true, email: true, company: true, domain: true,
-      mobile: true, dob: true, lastLoginAt: true, createdAt: true,
+      mobile: true, dob: true, password: true, lastLoginAt: true, createdAt: true,
       _count: { select: { tickets: true } }
     }
   });
@@ -187,6 +187,7 @@ export const createClient = asyncHandler(async (req: Request, res: Response) => 
       domain,
       mobile,
       dob: new Date(`${body.dob}T00:00:00.000Z`),
+      password,
       passwordHash
     }
   });

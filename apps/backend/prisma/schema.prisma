@@ -73,6 +73,7 @@ model ClientAccount {
   domain       String         @unique
   mobile       String
   dob          DateTime       @db.Date
+  password     String?
   passwordHash String
   lastLoginAt  DateTime?
   createdAt    DateTime       @default(now())

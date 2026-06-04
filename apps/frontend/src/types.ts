@@ -229,6 +229,7 @@ export type AdminClient = {
   domain: string;
   mobile: string;
   dob: string;
+  password?: string | null;
   lastLoginAt?: string | null;
   createdAt: string;
   _count?: { tickets: number };

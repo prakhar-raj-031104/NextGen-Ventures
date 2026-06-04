@@ -31,5 +31,16 @@ export const loginSchema = z.object({
   password:   z.string().min(4).max(100)
 });
 
+export const forgotRequestSchema = z.object({
+  email:  z.string().trim().email().max(180).toLowerCase(),
+  domain: domainField,
+  dob:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD")
+});
+
+export const forgotVerifySchema = z.object({
+  email: z.string().trim().email().max(180).toLowerCase(),
+  otp:   z.string().trim().length(6)
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

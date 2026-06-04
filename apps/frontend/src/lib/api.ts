@@ -110,6 +110,23 @@ export const api = {
     return body;
   },
 
+  async forgotRequest(payload: { email: string; domain: string; dob: string }): Promise<void> {
+    const r = await fetch(`${API_URL}/auth/forgot`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+    });
+    const b = (await r.json()) as ApiResponse<unknown> & { error?: { message: string } };
+    if (!r.ok) throw new Error(b.error?.message ?? "Unable to send code");
+  },
+
+  async forgotVerify(payload: { email: string; otp: string }): Promise<string> {
+    const r = await fetch(`${API_URL}/auth/forgot/verify`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+    });
+    const b = (await r.json()) as ApiResponse<{ password: string }> & { error?: { message: string } };
+    if (!r.ok) throw new Error(b.error?.message ?? "Invalid code");
+    return b.data.password;
+  },
+
   async getMe(token: string): Promise<ClientAccount> {
     const response = await fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${token}` }
