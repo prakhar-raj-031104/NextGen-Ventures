@@ -664,9 +664,113 @@ const appCaseStudies: ServiceCaseStudy[] = [
   }
 ];
 
+// ─── SOFTWARE DEVELOPMENT (AGENTIC AI / ML) ─────────────────────────────────
+
+const softwareDevPlans: PricingPlan[] = [
+  {
+    name: "AI Pilot",
+    price: "₹60,000",
+    priceNote: "starting",
+    description: "A focused proof-of-concept — one agentic workflow or LLM feature, wired into production and measured.",
+    features: [
+      "1 LLM-powered agent or workflow",
+      "RAG over your documents / data",
+      "Prompt engineering & evaluation",
+      "API + lightweight UI integration",
+      "Hosted models (Claude / OpenAI / open-source)",
+      "Usage & cost guardrails",
+      "2 weeks of support"
+    ],
+    cta: "Start a Pilot"
+  },
+  {
+    name: "Agentic Build",
+    price: "₹1,50,000",
+    priceNote: "starting",
+    highlight: true,
+    description: "Multi-agent systems and custom pipelines — from data ingestion through fine-tuning, evaluation, and deployment.",
+    features: [
+      "Multi-agent orchestration (tools, memory, routing)",
+      "Retrieval pipelines + vector database",
+      "Fine-tuning / LoRA on your data",
+      "Evaluation harness & safety guardrails",
+      "Backend APIs (Node / Python) + dashboards",
+      "Observability & token-cost monitoring",
+      "CI/CD + cloud infrastructure (AWS / GCP)",
+      "6 weeks of post-launch support"
+    ],
+    cta: "Scope the Build"
+  },
+  {
+    name: "MLOps & Scale",
+    price: "Custom",
+    description: "End-to-end MLOps — training, deployment, monitoring, and retraining pipelines built to run in production at scale.",
+    features: [
+      "Full pipeline: train → deploy → monitor → retrain",
+      "Model serving & autoscaling",
+      "Feature stores & data pipelines",
+      "Self-hosted / private LLM deployment",
+      "Drift detection & automated evaluation",
+      "Security, compliance & access control",
+      "Dedicated engineering & SLA"
+    ],
+    cta: "Talk to Engineering"
+  }
+];
+
+const softwareDevFaq: FaqItem[] = [
+  {
+    q: "What is agentic AI development?",
+    a: "Agentic AI systems use LLMs that can plan, call tools, hold memory, and take multi-step actions toward a goal — not just answer a single prompt. We design the agent's tools, routing, guardrails, and evaluation so it behaves reliably in production, not only in a demo."
+  },
+  {
+    q: "Do you fine-tune models or just use APIs?",
+    a: "Both. We start with the fastest path — prompt engineering and RAG over hosted models (Anthropic Claude, OpenAI, or open-source). When accuracy, cost, or privacy demand it, we fine-tune (full or LoRA) and can deploy open models on your own infrastructure."
+  },
+  {
+    q: "What does your end-to-end pipeline cover?",
+    a: "Everything from data ingestion and retrieval, through LLM agents and orchestration, to MLOps — evaluation, deployment, monitoring, cost guardrails, drift detection, and automated retraining. One team owns the whole path from prototype to production."
+  },
+  {
+    q: "Can you work with our existing stack and data?",
+    a: "Yes. We integrate with your databases, APIs, and cloud (AWS / GCP / Azure), keep your data private, and hand over clean, documented code and infrastructure that you fully own — no lock-in."
+  }
+];
+
 // ─── EXPORTED SERVICE LIST ───────────────────────────────────────────────────
 
 export const fallbackServices: Service[] = [
+  {
+    slug: "software-development",
+    title: "Software Development",
+    kicker: "Agentic AI · LLMs · Fine-tuning · MLOps",
+    summary: "Agentic AI systems, LLM applications, model fine-tuning, and end-to-end MLOps pipelines.",
+    description:
+      "We build production AI software end to end — from LLM-powered agents and retrieval pipelines to fine-tuning, evaluation, deployment, and MLOps. Whether you need a single intelligent workflow or a full multi-agent platform with monitoring and retraining, one team owns the path from prototype to production.",
+    deliverables: [
+      "Agentic AI systems (planning, tools, memory)",
+      "LLM applications (RAG, chat, copilots)",
+      "Model fine-tuning (full & LoRA)",
+      "End-to-end ML pipelines & MLOps",
+      "Vector search & retrieval infrastructure",
+      "Evaluation harnesses & safety guardrails",
+      "Backend APIs & system integration",
+      "Cloud deployment, monitoring & retraining"
+    ],
+    platforms: ["Python", "LLM Agents", "RAG", "Fine-tuning", "MLOps", "PyTorch", "AWS / GCP"],
+    accent: "#22d3ee",
+    imageUrl: `${imageBase}/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1600&q=85`,
+    plans: softwareDevPlans,
+    faq: softwareDevFaq,
+    whyUs: [
+      "One team owns the full path — LLM agents, retrieval, fine-tuning, and MLOps — so nothing breaks at the hand-offs",
+      "Evaluation and guardrails are built in from day one, so your AI ships measurable and safe, not just demo-ready",
+      "Model-agnostic: hosted Claude / OpenAI for speed, open-source plus fine-tuning when privacy or cost demands it",
+      "Production MLOps — monitoring, drift detection, and retraining — so models keep working long after launch",
+      "Cost guardrails and observability on every deployment, so token spend never surprises you",
+      "You own the code, models, and infrastructure — deployable on your own cloud with no lock-in"
+    ]
+  },
   {
     slug: "marketplace-growth",
     title: "Marketplace Growth & Management",

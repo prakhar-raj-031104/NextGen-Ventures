@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { ArrowRight, Boxes, Code, Globe, ShoppingBag, ShoppingCart, Sparkles, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Boxes, Code, Globe, ShoppingBag, ShoppingCart, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RoboticText } from "./RoboticText";
 import { ThreeBackground } from "./ThreeBackground";
@@ -25,10 +25,26 @@ const heroStats = [
   { value: 100, suffix: "%", label: "Yours to Keep" }
 ];
 
+// Live marketplace storefronts / listings for the brands we operate.
+const marketplaceChannels: { name: string; href: string; external: boolean }[] = [
+  {
+    name: "Amazon",
+    href: "https://www.amazon.in/stores/HenryCastleCo/page/EC65B8F2-B1B9-4C37-8BE1-F400657E6E8E",
+    external: true
+  },
+  {
+    name: "Flipkart",
+    href: "https://www.flipkart.com/henry-castle-co-regular-men-grey-jeans/p/itm24371449d219c",
+    external: true
+  },
+  // No live Myntra storefront yet — point to our marketplace case studies.
+  { name: "Myntra", href: "/projects", external: false }
+];
+
 const floatingServices = [
   { name: "Website Dev",         slug: "website-design-development", accent: "#00a3ff", icon: Globe,        delay: "0s",    dur: "5.4s" },
   { name: "Application Dev",     slug: "application-development",    accent: "#ffe45c", icon: Zap,          delay: "0.3s",  dur: "6.6s" },
-  { name: "Software Development",slug: "application-development",    accent: "#22d3ee", icon: Code,         delay: "0.7s",  dur: "5.8s" },
+  { name: "Software Development",slug: "software-development",        accent: "#22d3ee", icon: Code,         delay: "0.7s",  dur: "5.8s" },
   { name: "E-commerce",          slug: "ecommerce-imaging",          accent: "#ff8a3d", icon: ShoppingCart, delay: "1.1s",  dur: "6.1s" },
   { name: "Marketplace Growth",  slug: "marketplace-growth",         accent: "#36f5a2", icon: ShoppingBag,  delay: "1.4s",  dur: "5.2s" },
   { name: "Digital Marketing",   slug: "digital-marketing",          accent: "#c084fc", icon: TrendingUp,   delay: "1.8s",  dur: "6.4s" },
@@ -172,11 +188,33 @@ export const Hero = () => {
             })}
           </div>
 
-          {/* Marketplace channel strip */}
+          {/* Marketplace channel strip — live storefronts */}
           <div className="hero-channel-strip">
-            {["Amazon", "Flipkart", "Myntra"].map((ch) => (
-              <span key={ch}>{ch}</span>
-            ))}
+            {marketplaceChannels.map((ch) =>
+              ch.external ? (
+                <a
+                  key={ch.name}
+                  className="hero-channel-link"
+                  href={ch.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`View our ${ch.name} storefront`}
+                >
+                  {ch.name}
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </a>
+              ) : (
+                <Link
+                  key={ch.name}
+                  className="hero-channel-link"
+                  to={ch.href}
+                  aria-label={`View our ${ch.name} marketplace work`}
+                >
+                  {ch.name}
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </Link>
+              )
+            )}
           </div>
         </div>
       </div>

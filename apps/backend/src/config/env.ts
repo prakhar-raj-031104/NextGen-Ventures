@@ -14,7 +14,10 @@ const envSchema = z.object({
   UPLOAD_DIR: z.string().optional(),
   // Client portal authentication
   AUTH_SECRET: z.string().min(16, "AUTH_SECRET must be at least 16 characters").default("ngv-dev-secret-change-me-in-production"),
-  AUTH_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(24 * 7) // 7 days
+  AUTH_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(24 * 7), // 7 days
+  // Admin control panel
+  ADMIN_PASSWORD: z.string().min(6).default("nextgen@2024"),
+  ADMIN_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(12)
 });
 
 const result = envSchema.safeParse(process.env);

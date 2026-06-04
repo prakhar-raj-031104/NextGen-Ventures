@@ -134,3 +134,26 @@ enum InternshipStatus {
   OFFERED
   REJECTED
 }
+
+model ServiceInquiry {
+  id          String        @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  serviceSlug String
+  serviceName String
+  selections  Json
+  estimate    String?
+  message     String?
+  status      InquiryStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum InquiryStatus {
+  NEW
+  REVIEWING
+  QUOTED
+  CLOSED
+}

@@ -144,6 +144,114 @@ export type AuthSession = {
   password?: string;
 };
 
+export type InquirySelection = { question: string; answers: string[] };
+
+export type ServiceInquiryPayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  serviceSlug: string;
+  serviceName: string;
+  selections: InquirySelection[];
+  estimate?: string;
+  message?: string;
+};
+
+/* ── Admin control panel ─────────────────────────────────── */
+export type AdminServiceInquiry = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  serviceSlug: string;
+  serviceName: string;
+  selections: InquirySelection[];
+  estimate?: string | null;
+  message?: string | null;
+  status: string;
+  createdAt: string;
+};
+export type AdminTicket = {
+  id: string;
+  ticketNumber: string;
+  clientName: string;
+  email: string;
+  company: string;
+  projectRef: string;
+  serviceType: string;
+  requestType: string;
+  priority: string;
+  title: string;
+  description: string;
+  timeline?: string | null;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminLead = {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  phone?: string | null;
+  serviceInterest?: string | null;
+  budget?: string | null;
+  timeline?: string | null;
+  businessType?: string | null;
+  message: string;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminInternship = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  role: string;
+  education: string;
+  skills: string;
+  portfolio?: string | null;
+  linkedin?: string | null;
+  coverNote: string;
+  resumeUrl?: string | null;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminClient = {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  domain: string;
+  mobile: string;
+  dob: string;
+  lastLoginAt?: string | null;
+  createdAt: string;
+  _count?: { tickets: number };
+};
+
+export type AdminOverview = {
+  totals: {
+    tickets: number;
+    leads: number;
+    internships: number;
+    clients: number;
+    inquiries: number;
+    openTickets: number;
+    newLeads: number;
+    newInquiries: number;
+  };
+  ticketsByStatus: Record<string, number>;
+  leadsByStatus: Record<string, number>;
+  internshipsByStatus: Record<string, number>;
+  recentTickets: AdminTicket[];
+  recentLeads: AdminLead[];
+};
+
 export type InternshipPayload = {
   name: string;
   email: string;

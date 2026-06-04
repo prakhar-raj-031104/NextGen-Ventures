@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { Hero } from "../components/Hero";
 import { HorizontalProjects } from "../components/HorizontalProjects";
+import { ServiceConfigurator } from "../components/ServiceConfigurator";
+import { SectionHeading } from "../components/SectionHeading";
 import { PlatformMarquee } from "../components/PlatformMarquee";
 import { PlatformShowcase } from "../components/PlatformShowcase";
 import { ProcessRail } from "../components/ProcessRail";
@@ -50,6 +52,16 @@ export default function Home() {
         <ServicesPreview services={services} />
       </div>
       <HorizontalProjects projects={projects} />
+
+      <section className="section-shell" id="build">
+        <SectionHeading
+          eyebrow="Build Your Package"
+          title="Tell us what you need — get an instant estimate."
+          copy="Choose a service, pick your add-ons like WhatsApp, payments, social or API integration, and we'll tailor a package and price for you."
+        />
+        <ServiceConfigurator />
+      </section>
+
       <div className="section-bg-warm">
         <PlatformShowcase />
       </div>

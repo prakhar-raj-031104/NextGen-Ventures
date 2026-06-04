@@ -12,14 +12,31 @@ import type { Service } from "../types";
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Catalogue order — development lines first, then commerce & growth.
+const SERVICE_ORDER = [
+  "website-design-development",
+  "application-development",
+  "software-development",
+  "ecommerce-imaging",
+  "marketplace-growth",
+  "digital-marketing",
+  "ui-ux-design"
+];
+
+const orderServices = (list: Service[]): Service[] =>
+  [...list].sort(
+    (a, b) =>
+      (SERVICE_ORDER.indexOf(a.slug) + 1 || 999) - (SERVICE_ORDER.indexOf(b.slug) + 1 || 999)
+  );
+
 export default function Services() {
-  const [services, setServices] = useState<Service[]>(fallbackServices);
+  const [services, setServices] = useState<Service[]>(() => orderServices(fallbackServices));
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
     void api.getServices().then((items) => {
-      if (active) setServices(items);
+      if (active) setServices(orderServices(items));
     });
     return () => {
       active = false;

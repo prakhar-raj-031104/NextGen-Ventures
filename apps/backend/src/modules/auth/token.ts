@@ -58,3 +58,44 @@ export const verifyToken = (token: string): TokenPayload | null => {
     return null;
   }
 };
+
+/* ── Admin tokens (control panel) ─────────────────────────────────────────── */
+
+export interface AdminTokenPayload {
+  role: "admin";
+  iat: number;
+  exp: number;
+}
+
+export const signAdminToken = (): string => {
+  const now = Math.floor(Date.now() / 1000);
+  const payload: AdminTokenPayload = {
+    role: "admin",
+    iat: now,
+    exp: now + env.ADMIN_TOKEN_TTL_HOURS * 60 * 60
+  };
+  const header = base64url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+  const body = base64url(JSON.stringify(payload));
+  const signature = sign(`${header}.${body}`);
+  return `${header}.${body}.${signature}`;
+};
+
+export const verifyAdminToken = (token: string): AdminTokenPayload | null => {
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  const [header, body, signature] = parts;
+
+  const expected = sign(`${header}.${body}`);
+  const sigBuf = fromBase64url(signature);
+  const expBuf = fromBase64url(expected);
+  if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) return null;
+
+  try {
+    const payload = JSON.parse(fromBase64url(body).toString("utf8")) as AdminTokenPayload;
+    if (payload.role !== "admin") return null;
+    if (typeof payload.exp !== "number" || payload.exp < Math.floor(Date.now() / 1000)) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+};

@@ -16,6 +16,8 @@ const Services = lazy(() => import("./pages/Services"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ClientPortal = lazy(() => import("./pages/ClientPortal"));
 const Internship = lazy(() => import("./pages/Internship"));
+const Estimate = lazy(() => import("./pages/Estimate"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 export default function App() {
   const location = useLocation();
@@ -27,6 +29,17 @@ export default function App() {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0 });
   }, [location.pathname]);
+
+  // The control panel runs standalone — no marketing header/footer chrome.
+  if (location.pathname.startsWith("/admin")) {
+    return (
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   return (
     <>
@@ -43,6 +56,7 @@ export default function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/client-portal" element={<ClientPortal />} />
             <Route path="/internship" element={<Internship />} />
+            <Route path="/estimate" element={<Estimate />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

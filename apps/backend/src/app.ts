@@ -33,7 +33,7 @@ export const createApp = () => {
         callback(new HttpError(403, `CORS: origin "${origin}" is not allowed`));
       },
       credentials: true,
-      methods: ["GET", "POST", "OPTIONS"],
+      methods: ["GET", "POST", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "X-Request-Id", "Authorization"]
     })
   );
