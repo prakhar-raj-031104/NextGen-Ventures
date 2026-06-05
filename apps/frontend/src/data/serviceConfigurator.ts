@@ -204,9 +204,7 @@ export const serviceConfigs: ServiceConfig[] = [
         options: [
           { value: "amazon", label: "Amazon" },
           { value: "flipkart", label: "Flipkart" },
-          { value: "myntra", label: "Myntra" },
-          { value: "jiomart", label: "JioMart" },
-          { value: "meesho", label: "Meesho" }
+          { value: "myntra", label: "Myntra" }
         ]
       },
       {
