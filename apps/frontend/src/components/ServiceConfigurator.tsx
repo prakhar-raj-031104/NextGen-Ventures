@@ -169,7 +169,8 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
             <span className="cfg-estimate__label">Estimated cost</span>
             <strong className="cfg-estimate__value">{estimateLabel}</strong>
             <span className="cfg-estimate__note">
-              Hosting free for 3 years on new website builds. Final pricing is confirmed before any work begins.
+              Final price may vary — this is a short estimate. Hosting is free for 3 years on new website
+              builds; final pricing is confirmed before any work begins.
             </span>
           </div>
 

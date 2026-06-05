@@ -6,14 +6,14 @@ const imageBase = "https://images.unsplash.com";
 // Indicative pricing for additions clients commonly request via the portal.
 // Kept in one place so the Services pages and Client Portal stay consistent.
 export const addOnEstimates: AddOnEstimate[] = [
-  { label: "WhatsApp integration",        price: "₹1,000",      unit: "one-time" },
-  { label: "Payment gateway",             price: "₹1,000",      unit: "one-time" },
-  { label: "Delivery partner integration", price: "₹1,000",     unit: "one-time" },
-  { label: "Social media setup",          price: "₹500",        unit: "per platform" },
-  { label: "Domain registration",         price: "₹1,000",      unit: "per year" },
-  { label: "Course / LMS module",         price: "up to ₹2,500", unit: "per year", note: "Variable as per platform cost" },
-  { label: "Custom add-on module",        price: "up to ₹2,000", unit: "one-time", note: "Charges vary with scope" },
-  { label: "Hosting renewal",             price: "from ₹5,000",  unit: "per 4 years", note: "Free for 3 years on new builds · varies by host cost" }
+  { label: "WhatsApp integration",        price: "₹1,000",      unit: "one-time",    amount: 1000 },
+  { label: "Payment gateway",             price: "₹1,000",      unit: "one-time",    amount: 1000 },
+  { label: "Delivery partner integration", price: "₹1,000",     unit: "one-time",    amount: 1000 },
+  { label: "Social media setup",          price: "₹500",        unit: "per platform", amount: 500 },
+  { label: "Domain registration",         price: "₹1,000",      unit: "per year",    amount: 1000 },
+  { label: "Course / LMS module",         price: "up to ₹2,500", unit: "per year",   amount: 2500, note: "Variable as per platform cost" },
+  { label: "Custom add-on module",        price: "up to ₹2,000", unit: "one-time",   amount: 2000, note: "Charges vary with scope" },
+  { label: "Hosting renewal",             price: "from ₹5,000",  unit: "per 4 years", amount: 5000, note: "Free for 3 years on new builds · varies by host cost" }
 ];
 
 // ─── MARKETPLACE GROWTH ──────────────────────────────────────────────────────

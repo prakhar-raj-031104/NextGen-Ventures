@@ -322,6 +322,11 @@ function TicketsView({ rows, onStatus }: { rows: AdminTicket[]; onStatus: (id: s
           </div>
           <h3 className="adm-card__title">{r.title}</h3>
           <p className="adm-card__desc">{r.description}</p>
+          {r.addOns && r.addOns.length > 0 && (
+            <div className="adm-quote-estimate">
+              Add-ons: <strong>{r.addOns.join(", ")}</strong>{r.estimate ? ` · ${r.estimate}` : ""}
+            </div>
+          )}
           <div className="adm-card__meta">
             <span><strong>{r.clientName}</strong> · {r.company}</span>
             <span>{r.email}</span>

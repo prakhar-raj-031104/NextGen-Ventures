@@ -7380,3 +7380,35 @@ textarea {
   .cfg-questions { border-right: none; border-bottom: 1px solid var(--line); }
   .cfg-summary { position: static; }
 }
+
+/* Client portal — interactive add-on estimate */
+.cp-addon-select { width: 100%; }
+.cp-estimate__row { position: relative; }
+.cp-addon-remove {
+  border: none; background: transparent; cursor: pointer;
+  color: var(--muted); font-size: 1.3rem; line-height: 1; padding: 0 4px;
+  transition: color 150ms ease;
+}
+.cp-addon-remove:hover { color: #ff8080; }
+.cp-estimate__total {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 4px 4px; margin-top: 6px; border-top: 1px solid var(--line);
+}
+.cp-estimate__total span { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+.cp-estimate__total strong { font-size: 1.3rem; font-weight: 900; color: var(--orange); font-variant-numeric: tabular-nums; }
+
+/* Client portal — dark-themed native dropdown options (all selects) */
+.client-portal select option,
+.cp-addon-select option {
+  background: #141414;
+  color: #fff7ef;
+  padding: 10px 12px;
+}
+.client-portal select option:checked,
+.client-portal select option:hover {
+  background: #ff6a1a;
+  color: #0b0b0b;
+}
+.client-portal select {
+  color-scheme: dark;
+}

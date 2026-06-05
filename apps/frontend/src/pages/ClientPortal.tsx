@@ -121,6 +121,17 @@ export default function ClientPortal() {
   const set = (field: keyof TicketPayload, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  // Interactive add-on estimate
+  const [addOns, setAddOns] = useState<string[]>([]);
+  const addOnTotal = addOns.reduce(
+    (sum, label) => sum + (addOnEstimates.find((a) => a.label === label)?.amount ?? 0),
+    0
+  );
+  const fmtINR = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+  const estimateLabel = addOns.length ? `${fmtINR(addOnTotal)}+` : "";
+  const addAddOn = (label: string) => { if (label && !addOns.includes(label)) setAddOns((p) => [...p, label]); };
+  const removeAddOn = (label: string) => setAddOns((p) => p.filter((l) => l !== label));
+
   /* ── Authentication ──────────────────────────────────────── */
   const auth = useClientAuth();
   const [authMode, setAuthMode]   = useState<"register" | "login">("register");
@@ -296,7 +307,10 @@ export default function ClientPortal() {
     setStatus("sending");
     setErrorMsg("");
     try {
-      const res = await api.submitTicket(form, auth.token);
+      const res = await api.submitTicket(
+        { ...form, addOns, estimate: estimateLabel || undefined },
+        auth.token
+      );
       setTicketNumber(res.data.ticketNumber);
       setStatus("success");
 
@@ -729,18 +743,16 @@ export default function ClientPortal() {
                 </div>
 
                 <div className="cp-field">
-                  <label htmlFor="cp-title">Request Title <span className="required-mark">*</span></label>
-                  <input id="cp-title" required minLength={5} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="One clear sentence — what do you need?" />
+                  <label htmlFor="cp-title">Request Title</label>
+                  <input id="cp-title" value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="One clear sentence — what do you need?" />
                 </div>
 
                 <div className="cp-field">
                   <label htmlFor="cp-desc">
-                    Description <span className="required-mark">*</span>
+                    Description
                   </label>
                   <textarea
                     id="cp-desc"
-                    required
-                    minLength={20}
                     maxLength={3000}
                     rows={6}
                     value={form.description}
@@ -762,31 +774,63 @@ export default function ClientPortal() {
                 </div>
               </fieldset>
 
-              {/* ── Estimated add-on pricing ─────────────────── */}
+              {/* ── Build your add-on estimate ───────────────── */}
               <div className="cp-estimate">
                 <div className="cp-estimate__head">
                   <div className="cp-estimate__icon"><IndianRupee size={18} /></div>
                   <div>
-                    <span className="cp-estimate__title">Estimated add-on pricing</span>
-                    <p className="cp-estimate__hint">Indicative costs for common additions. We'll confirm a final quote on your ticket before any work begins.</p>
+                    <span className="cp-estimate__title">Add services to your request</span>
+                    <p className="cp-estimate__hint">Pick the add-ons you need — we'll total a quick estimate for you.</p>
                   </div>
                 </div>
-                <ul className="cp-estimate__list">
-                  {addOnEstimates.map((item) => (
-                    <li key={item.label} className="cp-estimate__row">
-                      <div className="cp-estimate__label">
-                        <span>{item.label}</span>
-                        {item.note && <small>{item.note}</small>}
-                      </div>
-                      <div className="cp-estimate__price">
-                        <strong>{item.price}</strong>
-                        <span>{item.unit}</span>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+
+                {/* Dropdown to add a service */}
+                <div className="cp-field">
+                  <select
+                    className="cp-addon-select"
+                    value=""
+                    onChange={(e) => { addAddOn(e.target.value); e.target.value = ""; }}
+                  >
+                    <option value="">+ Add a service…</option>
+                    {addOnEstimates
+                      .filter((a) => !addOns.includes(a.label))
+                      .map((a) => (
+                        <option key={a.label} value={a.label}>{a.label} — {a.price} ({a.unit})</option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Selected add-ons */}
+                {addOns.length > 0 && (
+                  <ul className="cp-estimate__list">
+                    {addOns.map((label) => {
+                      const item = addOnEstimates.find((a) => a.label === label);
+                      if (!item) return null;
+                      return (
+                        <li key={label} className="cp-estimate__row">
+                          <div className="cp-estimate__label">
+                            <span>{item.label}</span>
+                            {item.note && <small>{item.note}</small>}
+                          </div>
+                          <div className="cp-estimate__price">
+                            <strong>{item.price}</strong>
+                            <span>{item.unit}</span>
+                          </div>
+                          <button type="button" className="cp-addon-remove" onClick={() => removeAddOn(label)} aria-label={`Remove ${item.label}`}>×</button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+
+                {/* Running total */}
+                <div className="cp-estimate__total">
+                  <span>Estimated total</span>
+                  <strong>{addOns.length ? `${fmtINR(addOnTotal)}+` : "—"}</strong>
+                </div>
+
                 <p className="cp-estimate__note">
-                  <Info size={13} /> Hosting is free for the first 3 years on new builds. Final pricing varies with scope and platform costs.
+                  <Info size={13} /> Final price may vary — this is a short estimate. Hosting is free for the first 3 years on new builds; final pricing depends on scope and platform costs.
                 </p>
               </div>
 

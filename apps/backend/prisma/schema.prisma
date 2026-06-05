@@ -94,6 +94,8 @@ model ClientTicket {
   title        String
   description  String
   timeline     String?
+  addOns       String[]       @default([])
+  estimate     String?
   status       TicketStatus   @default(OPEN)
   accountId    String?
   account      ClientAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)

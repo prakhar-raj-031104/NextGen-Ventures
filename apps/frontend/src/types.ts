@@ -103,12 +103,15 @@ export type TicketPayload = {
   title: string;
   description: string;
   timeline?: string;
+  addOns?: string[];
+  estimate?: string;
 };
 
 export type AddOnEstimate = {
   label: string;
   price: string;
   unit: string;
+  amount: number; // numeric value used to compute the running estimate
   note?: string;
 };
 
@@ -186,6 +189,8 @@ export type AdminTicket = {
   title: string;
   description: string;
   timeline?: string | null;
+  addOns?: string[];
+  estimate?: string | null;
   status: string;
   createdAt: string;
 };

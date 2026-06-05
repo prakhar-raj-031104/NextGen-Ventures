@@ -37,6 +37,8 @@ export const createTicket = asyncHandler(async (req: Request, res: Response) => 
       title:       body.title,
       description: body.description,
       timeline:    body.timeline || null,
+      addOns:      body.addOns ?? [],
+      estimate:    body.estimate || null,
       accountId:   req.account?.sub ?? null
     }
   });

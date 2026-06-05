@@ -8,9 +8,11 @@ export const createTicketSchema = z.object({
   serviceType: z.string().trim().min(2).max(100),
   requestType: z.string().trim().min(2).max(100),
   priority:    z.enum(["NORMAL", "HIGH", "URGENT"]).default("NORMAL"),
-  title:       z.string().trim().min(5).max(200),
-  description: z.string().trim().min(20).max(4000),
-  timeline:    z.string().trim().max(100).optional().or(z.literal(""))
+  title:       z.string().trim().max(200).optional().default(""),
+  description: z.string().trim().max(4000).optional().default(""),
+  timeline:    z.string().trim().max(100).optional().or(z.literal("")),
+  addOns:      z.array(z.string().trim().max(120)).max(30).optional(),
+  estimate:    z.string().trim().max(60).optional().or(z.literal(""))
 });
 
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
