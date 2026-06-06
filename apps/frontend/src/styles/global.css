@@ -7289,6 +7289,12 @@ textarea {
 .cfg-q legend { padding: 0; font-size: 0.98rem; font-weight: 800; color: var(--white); }
 .cfg-q__hint { font-size: 0.78rem; color: var(--muted); margin-top: -6px; }
 .cfg-options { display: flex; flex-wrap: wrap; gap: 9px; }
+.cfg-q__number {
+  padding: 11px 13px; border-radius: 10px; max-width: 200px;
+  border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); color: var(--white);
+  font-size: 0.88rem; font-family: inherit; font-weight: 700;
+}
+.cfg-q__number:focus { outline: none; border-color: var(--orange); }
 .cfg-opt {
   display: inline-flex; align-items: center; gap: 9px;
   padding: 10px 13px; border-radius: 11px; cursor: pointer;

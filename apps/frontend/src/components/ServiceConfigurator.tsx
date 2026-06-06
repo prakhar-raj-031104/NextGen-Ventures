@@ -37,6 +37,22 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
   // Live estimate (only for estimatable services with a base selected).
   const estimate = useMemo(() => {
     if (!config.estimatable) return null;
+
+    // Per-product services: estimate = quantity × sum of selected per-product rates.
+    if (config.perProduct) {
+      const qtyQ = config.questions.find((q) => q.type === "number");
+      const qty = Number(qtyQ ? answers[qtyQ.id]?.[0] ?? "" : "");
+      let perUnit = 0;
+      config.questions.forEach((q) => {
+        if (q.type === "number") return;
+        (answers[q.id] ?? []).forEach((val) => {
+          const opt = q.options.find((o) => o.value === val);
+          if (opt?.price) perUnit += opt.price;
+        });
+      });
+      return qty > 0 && perUnit > 0 ? qty * perUnit : null;
+    }
+
     let total = 0;
     let hasBase = false;
     config.questions.forEach((q) => {
@@ -54,7 +70,9 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
   const estimateLabel = config.estimatable
     ? estimate !== null
       ? `${formatINR(estimate)}+ (indicative)`
-      : "Select a package to see your estimate"
+      : config.perProduct
+        ? "Enter quantity & pick services to see your estimate"
+        : "Select a package to see your estimate"
     : "Custom quote — we'll price it for you";
 
   const buildSelections = (): InquirySelection[] =>
@@ -141,6 +159,18 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
             <fieldset key={q.id} className="cfg-q">
               <legend>{q.label}</legend>
               {q.hint && <span className="cfg-q__hint">{q.hint}</span>}
+              {q.type === "number" ? (
+                <input
+                  type="number"
+                  min={1}
+                  className="cfg-q__number"
+                  placeholder="e.g. 50"
+                  value={answers[q.id]?.[0] ?? ""}
+                  onChange={(e) =>
+                    setAnswers((prev) => ({ ...prev, [q.id]: e.target.value ? [e.target.value] : [] }))
+                  }
+                />
+              ) : (
               <div className="cfg-options">
                 {q.options.map((o) => {
                   const active = (answers[q.id] ?? []).includes(o.value);
@@ -154,11 +184,11 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
                     >
                       <span className="cfg-opt__check">{active && <Check size={12} />}</span>
                       <span className="cfg-opt__label">{o.label}</span>
-                      {o.priceLabel && <span className="cfg-opt__price">{o.priceLabel}</span>}
                     </button>
                   );
                 })}
               </div>
+              )}
             </fieldset>
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { Boxes, Code, Globe, ShoppingBag, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
+import { Boxes, ClipboardList, Code, Globe, ShoppingBag, ShoppingCart, Sparkles, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type ConfigOption = {
@@ -13,7 +13,7 @@ export type ConfigQuestion = {
   id: string;
   label: string;
   hint?: string;
-  type: "single" | "multi";
+  type: "single" | "multi" | "number";
   options: ConfigOption[];
 };
 
@@ -24,6 +24,7 @@ export type ServiceConfig = {
   accent: string;
   tagline: string;
   estimatable: boolean; // true → show a running ₹ estimate
+  perProduct?: boolean; // true → estimate = quantity × selected per-product rates
   questions: ConfigQuestion[];
 };
 
@@ -344,6 +345,35 @@ export const serviceConfigs: ServiceConfig[] = [
           { value: "infographic", label: "Infographic" },
           { value: "aplus", label: "A+ content" },
           { value: "video", label: "Video" }
+        ]
+      }
+    ]
+  },
+  {
+    slug: "product-listing",
+    name: "Product Listing",
+    icon: ClipboardList,
+    accent: "#fb7185",
+    tagline: "Pick what you need per product — your estimate updates live.",
+    estimatable: true,
+    perProduct: true,
+    questions: [
+      {
+        id: "quantity",
+        label: "How many products?",
+        type: "number",
+        hint: "Enter the number of products you want listed.",
+        options: []
+      },
+      {
+        id: "services",
+        label: "What do you need per product?",
+        type: "multi",
+        hint: "Charged per product — select everything you'd like included.",
+        options: [
+          { value: "image", label: "Image creation", price: 10, priceLabel: "₹10 / product" },
+          { value: "info", label: "Product information (keywords, short & long description)", price: 5, priceLabel: "₹5 / product" },
+          { value: "listing", label: "Product listing", price: 5, priceLabel: "₹5 / product" }
         ]
       }
     ]
