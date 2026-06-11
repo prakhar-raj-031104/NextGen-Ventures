@@ -7,7 +7,7 @@ import { asyncHandler } from "../../utils/async-handler.js";
 import { HttpError } from "../../utils/http-error.js";
 import { signAdminToken } from "../auth/token.js";
 import { deriveClientPassword, hashPassword, normaliseDomain } from "../auth/password.js";
-import type { CreateClientInput } from "./admin.schema.js";
+import type { CreateClientInput, CreatePaymentInput } from "./admin.schema.js";
 
 const safeEqual = (a: string, b: string): boolean => {
   const ab = Buffer.from(a);
@@ -203,4 +203,36 @@ export const createClient = asyncHandler(async (req: Request, res: Response) => 
     },
     { message: `Client ${account.company} created. Share the generated password securely.`, status: 201 }
   );
+});
+
+/* ── Payments ─────────────────────────────────────────────────────────────── */
+export const listPayments = asyncHandler(async (_req: Request, res: Response) => {
+  const payments = await prisma.payment.findMany({
+    orderBy: { paidAt: "desc" },
+    include: { account: { select: { company: true, domain: true, email: true } } }
+  });
+  sendSuccess(res, payments);
+});
+
+/** Record a payment against a client account (shown in their portal). */
+export const createPayment = asyncHandler(async (req: Request, res: Response) => {
+  const body = req.body as CreatePaymentInput;
+
+  const account = await prisma.clientAccount.findUnique({ where: { id: body.accountId } });
+  if (!account) throw new HttpError(404, "Client account not found.");
+
+  const payment = await prisma.payment.create({
+    data: {
+      accountId:   body.accountId,
+      amount:      body.amount,
+      description: body.description,
+      invoiceNo:   body.invoiceNo || null,
+      method:      body.method || null,
+      status:      (body.status ?? "PAID") as never,
+      paidAt:      body.paidAt ? new Date(`${body.paidAt}T00:00:00.000Z`) : new Date()
+    },
+    include: { account: { select: { company: true, domain: true, email: true } } }
+  });
+
+  sendSuccess(res, payment, { message: `Payment recorded for ${account.company}.`, status: 201 });
 });

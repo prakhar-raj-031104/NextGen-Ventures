@@ -3642,6 +3642,56 @@ textarea {
   resize: vertical;
 }
 
+/* ── Business Type searchable combobox ──────────────────────── */
+/* Lift the whole Business Type row above later form rows so the open
+   dropdown isn't covered by them (each contact-form child is z-index:2). */
+.contact-form .form-grid--bt {
+  position: relative;
+  z-index: 20;
+}
+
+.bt-combo {
+  position: relative;
+}
+
+.bt-options {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.bt-option {
+  width: 100%;
+  min-height: 0;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.bt-option:hover,
+.bt-option--active {
+  background: rgba(255, 106, 26, 0.14);
+  color: var(--orange);
+}
+
 .contact-form .button {
   width: fit-content;
 }
@@ -7356,6 +7406,7 @@ textarea {
 }
 .cfg-success h3 { margin: 0; font-size: 1.5rem; color: var(--white); }
 .cfg-success p { margin: 0; max-width: 480px; font-size: 0.92rem; line-height: 1.65; color: var(--muted); }
+.cfg-success .cfg-estimate { width: 100%; max-width: 360px; text-align: left; }
 
 /* Estimate page add-on rate card */
 .est-addons { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
@@ -7418,3 +7469,88 @@ textarea {
 .client-portal select {
   color-scheme: dark;
 }
+
+/* ══ Admin: search bar + data tables ════════════════════════ */
+.adm-head__actions { display: flex; align-items: center; gap: 12px; }
+.adm-search {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--muted);
+}
+.adm-search input {
+  min-height: 0; width: 240px; max-width: 42vw; padding: 0; border: none;
+  background: transparent; color: var(--white); font-size: 0.86rem;
+}
+.adm-search input:focus { outline: none; box-shadow: none; }
+
+.adm-table-wrap {
+  width: 100%; overflow-x: auto; border: 1px solid var(--line);
+  border-radius: 14px; background: var(--panel);
+}
+.adm-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+.adm-table thead th {
+  position: sticky; top: 0; text-align: left; white-space: nowrap;
+  padding: 12px 14px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); background: color-mix(in srgb, var(--white) 4%, var(--panel));
+  border-bottom: 1px solid var(--line);
+}
+.adm-table tbody td {
+  padding: 12px 14px; color: var(--ink); border-bottom: 1px solid var(--line);
+  vertical-align: top; white-space: nowrap;
+}
+.adm-table tbody tr:last-child td { border-bottom: none; }
+.adm-table tbody tr:hover { background: color-mix(in srgb, var(--white) 3%, transparent); }
+.adm-table a { color: #60a5fa; text-decoration: none; }
+.adm-table a:hover { text-decoration: underline; }
+.adm-td-strong { color: var(--white); font-weight: 700; }
+.adm-td-mono { font-family: ui-monospace, monospace; color: var(--white); }
+.adm-td-date { color: var(--muted); }
+.adm-td-sub { display: block; color: var(--muted); font-size: 0.76rem; }
+.adm-td-clip { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-td-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.adm-ok { display: flex; align-items: center; gap: 7px; color: #36f5a2; font-size: 0.85rem; margin: 4px 0 0; }
+
+/* ══ Client portal: account dashboard tables ════════════════ */
+.cp-dash { display: grid; gap: 18px; margin-bottom: 30px; }
+.cp-dash-card {
+  border: 1px solid var(--line); border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02); overflow: hidden;
+}
+.cp-dash-card__head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 15px 18px; border-bottom: 1px solid var(--line); color: var(--orange);
+}
+.cp-dash-card__head h3 { margin: 0; font-size: 0.98rem; color: var(--white); }
+.cp-dash-card__total { margin-left: auto; font-size: 0.84rem; font-weight: 800; color: #36f5a2; }
+.cp-dash-empty { margin: 0; padding: 18px; color: var(--muted); font-size: 0.88rem; }
+.cp-table-wrap { width: 100%; overflow-x: auto; }
+.cp-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.cp-table th, .cp-table td { padding: 11px 16px; text-align: left; }
+.cp-table--data thead th {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.cp-table tbody tr { border-bottom: 1px solid var(--line); }
+.cp-table tbody tr:last-child { border-bottom: none; }
+/* Key/value layout for the account-details table (no thead) */
+.cp-table:not(.cp-table--data) th {
+  width: 38%; color: var(--muted); font-weight: 600; vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+.cp-table:not(.cp-table--data) td {
+  color: var(--white); font-weight: 600; border-bottom: 1px solid var(--line);
+}
+.cp-table:not(.cp-table--data) tr:last-child th,
+.cp-table:not(.cp-table--data) tr:last-child td { border-bottom: none; }
+.cp-table td { color: var(--ink); }
+.cp-table__amount { color: var(--white); font-weight: 800; white-space: nowrap; }
+.cp-table__mono { font-family: ui-monospace, monospace; color: var(--white); white-space: nowrap; }
+.cp-pill {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.03em;
+  background: rgba(255, 255, 255, 0.08); color: var(--white);
+}
+.cp-pill[data-st="PAID"], .cp-pill[data-st="RESOLVED"], .cp-pill[data-st="CLOSED"] { background: rgba(54, 245, 162, 0.16); color: #36f5a2; }
+.cp-pill[data-st="PENDING"], .cp-pill[data-st="OPEN"] { background: rgba(255, 157, 66, 0.16); color: #ff9d42; }
+.cp-pill[data-st="REFUNDED"] { background: rgba(255, 92, 92, 0.16); color: #ff5c5c; }
+.cp-pill[data-st="IN_REVIEW"], .cp-pill[data-st="IN_PROGRESS"] { background: rgba(96, 165, 250, 0.16); color: #60a5fa; }

@@ -4,10 +4,14 @@ import type {
   AdminInternship,
   AdminLead,
   AdminOverview,
+  AdminPayment,
   AdminServiceInquiry,
   AdminTicket,
   AuthSession,
   ClientAccount,
+  ClientPayment,
+  ClientTicketRow,
+  CreatePaymentPayload,
   InternshipPayload,
   LeadPayload,
   LoginPayload,
@@ -138,6 +142,24 @@ export const api = {
     return body.data.account;
   },
 
+  async getMyPayments(token: string): Promise<ClientPayment[]> {
+    const response = await fetch(`${API_URL}/auth/payments`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("Unable to load your payments");
+    const body = (await response.json()) as ApiResponse<ClientPayment[]>;
+    return body.data;
+  },
+
+  async getMyTickets(token: string): Promise<ClientTicketRow[]> {
+    const response = await fetch(`${API_URL}/auth/tickets`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error("Unable to load your tickets");
+    const body = (await response.json()) as ApiResponse<ClientTicketRow[]>;
+    return body.data;
+  },
+
   async submitTicket(payload: TicketPayload, token: string) {
     const response = await fetch(`${API_URL}/tickets`, {
       method: "POST",
@@ -225,6 +247,10 @@ export const adminApi = {
   internships: (token: string) => adminRequest<AdminInternship[]>("/internships", token).then((r) => r.data),
   clients:  (token: string) => adminRequest<AdminClient[]>("/clients", token).then((r) => r.data),
   inquiries: (token: string) => adminRequest<AdminServiceInquiry[]>("/inquiries", token).then((r) => r.data),
+  payments: (token: string) => adminRequest<AdminPayment[]>("/payments", token).then((r) => r.data),
+
+  createPayment: (token: string, payload: CreatePaymentPayload) =>
+    adminRequest<AdminPayment>("/payments", token, { method: "POST", body: JSON.stringify(payload) }).then((r) => r.data),
 
   setInquiryStatus: (token: string, id: string, status: string) =>
     adminRequest<AdminServiceInquiry>(`/inquiries/${id}`, token, { method: "PATCH", body: JSON.stringify({ status }) }).then((r) => r.data),

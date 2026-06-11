@@ -36,12 +36,104 @@ const timelineOptions = [
   "Just exploring"
 ];
 
+// Website / business types — used for the searchable Business Type field.
+// Sorted alphabetically so the full list reads cleanly when no filter is typed.
 const businessTypeOptions = [
-  "Marketplace brand (Amazon / Flipkart / Myntra)",
-  "Startup / new business",
-  "Service company / agency",
-  "Corporate / enterprise",
-  "Individual / freelancer",
+  "Accounting & Bookkeeping Website",
+  "Affiliate Marketing Website",
+  "Agriculture & Farming Website",
+  "Automobile / Car Dealership Website",
+  "Bakery Website",
+  "Beauty & Cosmetics Store",
+  "Blog / Personal Website",
+  "Bookstore",
+  "Cafe / Coffee Shop Website",
+  "Car Rental Website",
+  "Catering Service Website",
+  "Charity / Donation Website",
+  "Classifieds Website",
+  "Clinic Website",
+  "Clothing & Apparel Store",
+  "Cloud Kitchen Website",
+  "Coaching & Tutoring Website",
+  "College / University Website",
+  "Community / Forum Website",
+  "Construction & Architecture Website",
+  "Consulting Firm Website",
+  "Corporate / Business Website",
+  "Cryptocurrency / Blockchain Website",
+  "Dating Website",
+  "Dental Clinic Website",
+  "Diagnostic Lab Website",
+  "Digital Agency Website",
+  "Directory / Listing Website",
+  "Doctor / Physician Website",
+  "Dropshipping Store",
+  "E-commerce Store",
+  "Education / E-learning Website",
+  "EdTech Platform",
+  "Electronics Store",
+  "Event Management Website",
+  "Fashion & Lifestyle Store",
+  "Finance & Banking Website",
+  "Fintech / Payments Platform",
+  "Fitness & Gym Website",
+  "Flight & Hotel Booking Portal",
+  "Food Delivery Website",
+  "Footwear Store",
+  "Freelance Marketplace",
+  "Furniture & Home Decor Store",
+  "Government / Public Sector Website",
+  "Grocery / Supermarket Store",
+  "Handicrafts & Artisan Store",
+  "Healthcare / Medical Website",
+  "Hospital Website",
+  "Hotel & Resort Website",
+  "Insurance Website",
+  "Interior Design Website",
+  "Investment & Trading Platform",
+  "IT / Software Company Website",
+  "Jewellery Store",
+  "Job Portal / Recruitment Website",
+  "Law Firm Website",
+  "Loan & Mortgage Website",
+  "Logistics & Supply Chain Website",
+  "Manufacturing & Industrial Website",
+  "Marketplace / Multi-vendor Website",
+  "Matrimonial Website",
+  "Membership / Subscription Website",
+  "Mental Health & Therapy Website",
+  "Music & Band Website",
+  "News & Magazine Portal",
+  "Non-profit / NGO Website",
+  "Nutrition & Diet Website",
+  "On-demand Service App Website",
+  "Pet Supplies Store",
+  "Pharmacy / Medical Store",
+  "Photography Website",
+  "Podcast Website",
+  "Political Campaign Website",
+  "Portfolio Website",
+  "Property Listing Portal",
+  "Real Estate Website",
+  "Religious / Temple Website",
+  "Restaurant Website",
+  "SaaS Product Website",
+  "Salon & Spa Website",
+  "School Website",
+  "Social Networking Platform",
+  "Sports & Fitness Equipment Store",
+  "Startup Landing Page",
+  "Stationery Store",
+  "Telemedicine Platform",
+  "Tourism & Travel Website",
+  "Toys & Games Store",
+  "Travel Agency Website",
+  "Vacation Rental Website",
+  "Video Streaming Platform",
+  "Wedding & Event Website",
+  "Wedding Planner Website",
+  "Yoga & Wellness Website",
   "Other"
 ];
 
@@ -63,6 +155,19 @@ export const ContactForm = ({ services }: ContactFormProps) => {
   // Multi-select service interest
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [customService, setCustomService] = useState("");
+
+  // Business-type searchable combobox
+  const [btOpen, setBtOpen] = useState(false);
+
+  const businessTypeMatches = (() => {
+    const q = (form.businessType ?? "").trim().toLowerCase();
+    if (!q) return businessTypeOptions;
+    // Prefix match on the whole label or any word within it (e.g. "p" → Pharmacy, Photography).
+    return businessTypeOptions.filter((opt) => {
+      const label = opt.toLowerCase();
+      return label.startsWith(q) || label.split(/[^a-z0-9]+/).some((word) => word.startsWith(q));
+    });
+  })();
 
   const updateField = (field: keyof LeadPayload, value: string) => {
     setForm((current) => ({ ...current, [field]: value }));
@@ -255,18 +360,47 @@ export const ContactForm = ({ services }: ContactFormProps) => {
       </div>
 
       {/* Row 3: Business type + Budget */}
-      <div className="form-grid">
+      <div className="form-grid form-grid--bt">
         <label>
           Business Type
-          <select
-            value={form.businessType}
-            onChange={(e) => updateField("businessType", e.target.value)}
-          >
-            <option value="">Select business type</option>
-            {businessTypeOptions.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+          <div className="bt-combo">
+            <input
+              type="text"
+              value={form.businessType ?? ""}
+              onChange={(e) => {
+                updateField("businessType", e.target.value);
+                setBtOpen(true);
+              }}
+              onFocus={() => setBtOpen(true)}
+              onBlur={() => window.setTimeout(() => setBtOpen(false), 120)}
+              placeholder="Type a website / business type…"
+              autoComplete="off"
+              role="combobox"
+              aria-expanded={btOpen}
+              aria-autocomplete="list"
+            />
+            {btOpen && businessTypeMatches.length > 0 && (
+              <ul className="bt-options" role="listbox">
+                {businessTypeMatches.map((opt) => (
+                  <li key={opt}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={form.businessType === opt}
+                      className={form.businessType === opt ? "bt-option bt-option--active" : "bt-option"}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        updateField("businessType", opt);
+                        setBtOpen(false);
+                      }}
+                    >
+                      {opt}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </label>
         <label>
           Budget Range

@@ -240,6 +240,52 @@ export type AdminClient = {
   _count?: { tickets: number };
 };
 
+export type AdminPayment = {
+  id: string;
+  accountId: string;
+  amount: number;
+  description: string;
+  invoiceNo?: string | null;
+  method?: string | null;
+  status: string;
+  paidAt: string;
+  createdAt: string;
+  account?: { company: string; domain: string; email: string } | null;
+};
+
+export type CreatePaymentPayload = {
+  accountId: string;
+  amount: number;
+  description: string;
+  invoiceNo?: string;
+  method?: string;
+  status?: string;
+  paidAt?: string;
+};
+
+/* ── Client portal (self-service) ────────────────────────── */
+export type ClientPayment = {
+  id: string;
+  amount: number;
+  description: string;
+  invoiceNo?: string | null;
+  method?: string | null;
+  status: string;
+  paidAt: string;
+};
+
+export type ClientTicketRow = {
+  id: string;
+  ticketNumber: string;
+  title: string;
+  serviceType: string;
+  requestType: string;
+  priority: string;
+  status: string;
+  estimate?: string | null;
+  createdAt: string;
+};
+
 export type AdminOverview = {
   totals: {
     tickets: number;

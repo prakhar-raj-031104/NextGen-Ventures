@@ -67,12 +67,14 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
     return hasBase ? total : null;
   }, [answers, config]);
 
+  // We intentionally hide the ₹ value while configuring — it's revealed on the
+  // success screen, after the lead reaches the admin panel.
   const estimateLabel = config.estimatable
     ? estimate !== null
-      ? `${formatINR(estimate)}+ (indicative)`
+      ? "Your estimate is ready — submit to reveal it"
       : config.perProduct
-        ? "Enter quantity & pick services to see your estimate"
-        : "Select a package to see your estimate"
+        ? "Enter quantity & pick services to get your estimate"
+        : "Select a package to get your estimate"
     : "Custom quote — we'll price it for you";
 
   const buildSelections = (): InquirySelection[] =>
@@ -112,10 +114,21 @@ export function ServiceConfigurator({ defaultSlug }: { defaultSlug?: string }) {
         <div className="cfg-success__icon"><Check size={34} /></div>
         <h3>Request received 🎉</h3>
         <p>
-          Thanks {contact.name.split(" ")[0] || "there"} — we've logged your {config.name.toLowerCase()} request
-          {config.estimatable && estimate !== null ? ` (around ${formatINR(estimate)}+)` : ""}. Our team will reach out
-          on <strong>{contact.email}</strong> with a tailored proposal.
+          Thanks {contact.name.split(" ")[0] || "there"} — we've logged your {config.name.toLowerCase()} request.
+          Our team will reach out on <strong>{contact.email}</strong> with a tailored proposal.
         </p>
+
+        {config.estimatable && estimate !== null && (
+          <div className="cfg-estimate" style={{ "--c": config.accent } as React.CSSProperties}>
+            <span className="cfg-estimate__label">Your indicative estimate</span>
+            <strong className="cfg-estimate__value">{formatINR(estimate)}+</strong>
+            <span className="cfg-estimate__note">
+              Final price may vary — this is a short estimate. Hosting is free for 3 years on new website
+              builds; final pricing is confirmed before any work begins.
+            </span>
+          </div>
+        )}
+
         <button
           className="button button--outline"
           onClick={() => { setStatus("idle"); setAnswers({}); setContact({ name: "", email: "", phone: "", company: "", message: "" }); }}

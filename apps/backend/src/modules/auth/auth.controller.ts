@@ -175,3 +175,27 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
 
   sendSuccess(res, { account: publicAccount(account) });
 });
+
+/** Payments recorded against the signed-in client's account. */
+export const myPayments = asyncHandler(async (req: Request, res: Response) => {
+  const accountId = req.account?.sub;
+  if (!accountId) throw new HttpError(401, "Authentication required.");
+
+  const payments = await prisma.payment.findMany({
+    where: { accountId },
+    orderBy: { paidAt: "desc" }
+  });
+  sendSuccess(res, payments);
+});
+
+/** Tickets raised by the signed-in client. */
+export const myTickets = asyncHandler(async (req: Request, res: Response) => {
+  const accountId = req.account?.sub;
+  if (!accountId) throw new HttpError(401, "Authentication required.");
+
+  const tickets = await prisma.clientTicket.findMany({
+    where: { accountId },
+    orderBy: { createdAt: "desc" }
+  });
+  sendSuccess(res, tickets);
+});

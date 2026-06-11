@@ -273,7 +273,7 @@ function ServiceDetailInner({
               <h1 className="service-hero__title">{service.title}</h1>
               <p className="service-hero__desc">{service.description}</p>
               <div className="service-hero__actions">
-                <Link className="button button--dark" to="/contact">
+                <Link className="button button--dark" to={`/estimate?service=${service.slug}`}>
                   Start a Project
                   <ArrowRight size={18} aria-hidden="true" />
                 </Link>
@@ -478,7 +478,7 @@ function ServiceDetailInner({
 
               <div className="sd-work-cta" data-reveal>
                 <p>Want results like these for your brand?</p>
-                <Link className="button button--dark" to="/contact">
+                <Link className="button button--dark" to={`/estimate?service=${service.slug}`}>
                   Start a Project
                   <ArrowUpRight size={16} aria-hidden="true" />
                 </Link>

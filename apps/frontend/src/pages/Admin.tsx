@@ -6,11 +6,14 @@ import {
   Briefcase,
   CheckCircle2,
   Copy,
+  CreditCard,
   LayoutDashboard,
   LogOut,
   FileText,
   Mail,
+  Plus,
   RefreshCw,
+  Search,
   ShieldCheck,
   Ticket,
   TrendingUp,
@@ -23,6 +26,7 @@ import type {
   AdminInternship,
   AdminLead,
   AdminOverview,
+  AdminPayment,
   AdminServiceInquiry,
   AdminTicket
 } from "../types";
@@ -37,13 +41,23 @@ const INQUIRY_STATUSES = ["NEW", "REVIEWING", "QUOTED", "CLOSED"];
 const STATUS_COLORS: Record<string, string> = {
   OPEN: "#ff9d42", IN_REVIEW: "#60a5fa", IN_PROGRESS: "#a78bfa", RESOLVED: "#36f5a2", CLOSED: "#8a8f98",
   NEW: "#ff9d42", CONTACTED: "#60a5fa", QUALIFIED: "#36f5a2", QUOTED: "#a78bfa",
-  PENDING: "#ff9d42", REVIEWING: "#60a5fa", SHORTLISTED: "#a78bfa", OFFERED: "#36f5a2", REJECTED: "#ff5c5c"
+  PENDING: "#ff9d42", REVIEWING: "#60a5fa", SHORTLISTED: "#a78bfa", OFFERED: "#36f5a2", REJECTED: "#ff5c5c",
+  PAID: "#36f5a2", REFUNDED: "#ff5c5c"
 };
 
-type Tab = "overview" | "tickets" | "leads" | "internships" | "clients" | "inquiries";
+type Tab = "overview" | "tickets" | "leads" | "internships" | "clients" | "inquiries" | "payments";
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+
+const fmtINR = (n: number) => `₹${n.toLocaleString("en-IN")}`;
+
+/** Case-insensitive "does any of these fields contain the query" helper. */
+const makeMatcher = (query: string) => {
+  const q = query.trim().toLowerCase();
+  return (...vals: (string | null | undefined)[]) =>
+    !q || vals.some((v) => (v ?? "").toLowerCase().includes(q));
+};
 
 function StatusBadge({ status }: { status: string }) {
   return (
@@ -115,6 +129,7 @@ function AdminLogin({ onAuthed }: { onAuthed: (token: string) => void }) {
 export default function Admin() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [tab, setTab] = useState<Tab>("overview");
+  const [query, setQuery] = useState("");
 
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [tickets, setTickets] = useState<AdminTicket[]>([]);
@@ -122,6 +137,7 @@ export default function Admin() {
   const [interns, setInterns] = useState<AdminInternship[]>([]);
   const [clients, setClients] = useState<AdminClient[]>([]);
   const [inquiries, setInquiries] = useState<AdminServiceInquiry[]>([]);
+  const [payments, setPayments] = useState<AdminPayment[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -147,6 +163,7 @@ export default function Admin() {
       else if (which === "internships") setInterns(await adminApi.internships(t));
       else if (which === "clients") setClients(await adminApi.clients(t));
       else if (which === "inquiries") setInquiries(await adminApi.inquiries(t));
+      else if (which === "payments") setPayments(await adminApi.payments(t));
     } catch (err) {
       guard(err);
     } finally {
@@ -157,6 +174,9 @@ export default function Admin() {
   useEffect(() => {
     if (token) void load(tab, token);
   }, [tab, token, load]);
+
+  // Reset the search box whenever the tab changes.
+  useEffect(() => { setQuery(""); }, [tab]);
 
   if (!token) {
     return (
@@ -174,8 +194,11 @@ export default function Admin() {
     { id: "tickets",     label: "Tickets",       Icon: Ticket },
     { id: "leads",       label: "Enquiries",     Icon: Mail },
     { id: "internships", label: "Internships",   Icon: Briefcase },
-    { id: "clients",     label: "Clients",       Icon: Users }
+    { id: "clients",     label: "Clients",       Icon: Users },
+    { id: "payments",    label: "Payments",      Icon: CreditCard }
   ];
+
+  const searchable = tab !== "overview";
 
   return (
     <div className="adm">
@@ -202,9 +225,22 @@ export default function Admin() {
       <main className="adm-main">
         <header className="adm-head">
           <h1>{nav.find((n) => n.id === tab)?.label}</h1>
-          <button className="adm-refresh" onClick={() => void load(tab, t)} disabled={loading}>
-            <RefreshCw size={15} className={loading ? "spin" : ""} /> Refresh
-          </button>
+          <div className="adm-head__actions">
+            {searchable && (
+              <div className="adm-search">
+                <Search size={15} />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search phone, email, domain…"
+                  aria-label="Search records"
+                />
+              </div>
+            )}
+            <button className="adm-refresh" onClick={() => void load(tab, t)} disabled={loading}>
+              <RefreshCw size={15} className={loading ? "spin" : ""} /> Refresh
+            </button>
+          </div>
         </header>
 
         {error && <p className="adm-error"><AlertCircle size={15} /> {error}</p>}
@@ -213,6 +249,7 @@ export default function Admin() {
         {tab === "tickets" && (
           <TicketsView
             rows={tickets}
+            query={query}
             onStatus={async (id, status) => {
               try { const u = await adminApi.setTicketStatus(t, id, status);
                 setTickets((p) => p.map((x) => (x.id === id ? u : x))); } catch (e) { guard(e); }
@@ -222,6 +259,7 @@ export default function Admin() {
         {tab === "leads" && (
           <LeadsView
             rows={leads}
+            query={query}
             onStatus={async (id, status) => {
               try { const u = await adminApi.setLeadStatus(t, id, status);
                 setLeads((p) => p.map((x) => (x.id === id ? u : x))); } catch (e) { guard(e); }
@@ -231,6 +269,7 @@ export default function Admin() {
         {tab === "internships" && (
           <InternshipsView
             rows={interns}
+            query={query}
             onStatus={async (id, status) => {
               try { const u = await adminApi.setInternshipStatus(t, id, status);
                 setInterns((p) => p.map((x) => (x.id === id ? u : x))); } catch (e) { guard(e); }
@@ -238,16 +277,20 @@ export default function Admin() {
           />
         )}
         {tab === "clients" && (
-          <ClientsView rows={clients} token={t} onCreated={() => void load("clients", t)} />
+          <ClientsView rows={clients} query={query} token={t} onCreated={() => void load("clients", t)} />
         )}
         {tab === "inquiries" && (
           <QuotesView
             rows={inquiries}
+            query={query}
             onStatus={async (id, status) => {
               try { const u = await adminApi.setInquiryStatus(t, id, status);
                 setInquiries((p) => p.map((x) => (x.id === id ? u : x))); } catch (e) { guard(e); }
             }}
           />
+        )}
+        {tab === "payments" && (
+          <PaymentsView rows={payments} clients={clients} query={query} token={t} onCreated={() => void load("payments", t)} />
         )}
       </main>
     </div>
@@ -309,123 +352,138 @@ function OverviewView({ data, loading, onJump }: { data: AdminOverview | null; l
   );
 }
 
-/* ── Tickets ──────────────────────────────────────────────── */
-function TicketsView({ rows, onStatus }: { rows: AdminTicket[]; onStatus: (id: string, s: string) => void }) {
-  if (rows.length === 0) return <p className="adm-empty">No tickets yet.</p>;
+/** Shared scrollable table shell with an empty / no-results state. */
+function TableShell({ head, children, empty }: { head: React.ReactNode; children: React.ReactNode; empty: boolean }) {
+  if (empty) return <p className="adm-empty">No matching records.</p>;
   return (
-    <div className="adm-cards">
-      {rows.map((r) => (
-        <article key={r.id} className="adm-card">
-          <div className="adm-card__top">
-            <span className="adm-card__ref">{r.ticketNumber}</span>
-            <StatusSelect value={r.status} options={TICKET_STATUSES} onChange={(s) => onStatus(r.id, s)} />
-          </div>
-          <h3 className="adm-card__title">{r.title}</h3>
-          <p className="adm-card__desc">{r.description}</p>
-          {r.addOns && r.addOns.length > 0 && (
-            <div className="adm-quote-estimate">
-              Add-ons: <strong>{r.addOns.join(", ")}</strong>{r.estimate ? ` · ${r.estimate}` : ""}
-            </div>
-          )}
-          <div className="adm-card__meta">
-            <span><strong>{r.clientName}</strong> · {r.company}</span>
-            <span>{r.email}</span>
-            <span>{r.serviceType} · {r.requestType}</span>
-            <span className="adm-card__pri" data-pri={r.priority}>{r.priority}{r.timeline ? ` · ${r.timeline}` : ""}</span>
-            <span className="adm-card__date">{fmtDate(r.createdAt)}</span>
-          </div>
-        </article>
-      ))}
+    <div className="adm-table-wrap">
+      <table className="adm-table">
+        <thead><tr>{head}</tr></thead>
+        <tbody>{children}</tbody>
+      </table>
     </div>
+  );
+}
+
+/* ── Tickets ──────────────────────────────────────────────── */
+function TicketsView({ rows, query, onStatus }: { rows: AdminTicket[]; query: string; onStatus: (id: string, s: string) => void }) {
+  if (rows.length === 0) return <p className="adm-empty">No tickets yet.</p>;
+  const match = makeMatcher(query);
+  const filtered = rows.filter((r) => match(r.email, r.clientName, r.company, r.projectRef, r.ticketNumber, r.title));
+  return (
+    <TableShell empty={filtered.length === 0} head={<>
+      <th>Ticket</th><th>Title</th><th>Client</th><th>Company</th><th>Email</th>
+      <th>Service / Request</th><th>Priority</th><th>Estimate</th><th>Created</th><th>Status</th>
+    </>}>
+      {filtered.map((r) => (
+        <tr key={r.id}>
+          <td className="adm-td-mono">{r.ticketNumber}</td>
+          <td className="adm-td-strong">{r.title}</td>
+          <td>{r.clientName}</td>
+          <td>{r.company}</td>
+          <td><a href={`mailto:${r.email}`}>{r.email}</a></td>
+          <td>{r.serviceType}<span className="adm-td-sub">{r.requestType}</span></td>
+          <td><span className="adm-card__pri" data-pri={r.priority}>{r.priority}</span></td>
+          <td>{r.estimate ?? (r.addOns && r.addOns.length ? r.addOns.join(", ") : "—")}</td>
+          <td className="adm-td-date">{fmtDate(r.createdAt)}</td>
+          <td><StatusSelect value={r.status} options={TICKET_STATUSES} onChange={(s) => onStatus(r.id, s)} /></td>
+        </tr>
+      ))}
+    </TableShell>
   );
 }
 
 /* ── Leads ────────────────────────────────────────────────── */
-function LeadsView({ rows, onStatus }: { rows: AdminLead[]; onStatus: (id: string, s: string) => void }) {
+function LeadsView({ rows, query, onStatus }: { rows: AdminLead[]; query: string; onStatus: (id: string, s: string) => void }) {
   if (rows.length === 0) return <p className="adm-empty">No enquiries yet.</p>;
+  const match = makeMatcher(query);
+  const filtered = rows.filter((r) => match(r.email, r.phone, r.name, r.company, r.businessType));
   return (
-    <div className="adm-cards">
-      {rows.map((r) => (
-        <article key={r.id} className="adm-card">
-          <div className="adm-card__top">
-            <span className="adm-card__ref">{r.name}</span>
-            <StatusSelect value={r.status} options={LEAD_STATUSES} onChange={(s) => onStatus(r.id, s)} />
-          </div>
-          <p className="adm-card__desc">{r.message}</p>
-          <div className="adm-card__meta">
-            <span><strong>{r.company}</strong></span>
-            <span><a href={`mailto:${r.email}`}>{r.email}</a>{r.phone ? ` · ${r.phone}` : ""}</span>
-            <span>{[r.serviceInterest, r.budget, r.businessType].filter(Boolean).join(" · ") || "—"}</span>
-            <span className="adm-card__date">{fmtDate(r.createdAt)}</span>
-          </div>
-        </article>
+    <TableShell empty={filtered.length === 0} head={<>
+      <th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>Interest</th>
+      <th>Budget</th><th>Business Type</th><th>Message</th><th>Created</th><th>Status</th>
+    </>}>
+      {filtered.map((r) => (
+        <tr key={r.id}>
+          <td className="adm-td-strong">{r.name}</td>
+          <td>{r.company}</td>
+          <td><a href={`mailto:${r.email}`}>{r.email}</a></td>
+          <td>{r.phone ?? "—"}</td>
+          <td>{r.serviceInterest ?? "—"}</td>
+          <td>{r.budget ?? "—"}</td>
+          <td>{r.businessType ?? "—"}</td>
+          <td className="adm-td-clip" title={r.message}>{r.message}</td>
+          <td className="adm-td-date">{fmtDate(r.createdAt)}</td>
+          <td><StatusSelect value={r.status} options={LEAD_STATUSES} onChange={(s) => onStatus(r.id, s)} /></td>
+        </tr>
       ))}
-    </div>
+    </TableShell>
   );
 }
 
 /* ── Internships ──────────────────────────────────────────── */
-function InternshipsView({ rows, onStatus }: { rows: AdminInternship[]; onStatus: (id: string, s: string) => void }) {
+function InternshipsView({ rows, query, onStatus }: { rows: AdminInternship[]; query: string; onStatus: (id: string, s: string) => void }) {
   if (rows.length === 0) return <p className="adm-empty">No applications yet.</p>;
+  const match = makeMatcher(query);
+  const filtered = rows.filter((r) => match(r.email, r.phone, r.name, r.role, r.skills));
   return (
-    <div className="adm-cards">
-      {rows.map((r) => (
-        <article key={r.id} className="adm-card">
-          <div className="adm-card__top">
-            <span className="adm-card__ref">{r.name} · {r.role}</span>
-            <StatusSelect value={r.status} options={INTERN_STATUSES} onChange={(s) => onStatus(r.id, s)} />
-          </div>
-          <p className="adm-card__desc">{r.coverNote}</p>
-          <div className="adm-card__meta">
-            <span><a href={`mailto:${r.email}`}>{r.email}</a>{r.phone ? ` · ${r.phone}` : ""}</span>
-            <span>{r.education} · {r.skills}</span>
-            <span>
-              {r.portfolio && <a href={r.portfolio} target="_blank" rel="noreferrer">Portfolio</a>}
-              {r.linkedin && <> · <a href={r.linkedin} target="_blank" rel="noreferrer">LinkedIn</a></>}
-              {r.resumeUrl && <> · <a href={r.resumeUrl} target="_blank" rel="noreferrer">Resume</a></>}
-            </span>
-            <span className="adm-card__date">{fmtDate(r.createdAt)}</span>
-          </div>
-        </article>
+    <TableShell empty={filtered.length === 0} head={<>
+      <th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Education</th>
+      <th>Skills</th><th>Links</th><th>Created</th><th>Status</th>
+    </>}>
+      {filtered.map((r) => (
+        <tr key={r.id}>
+          <td className="adm-td-strong">{r.name}</td>
+          <td>{r.role}</td>
+          <td><a href={`mailto:${r.email}`}>{r.email}</a></td>
+          <td>{r.phone ?? "—"}</td>
+          <td>{r.education}</td>
+          <td className="adm-td-clip" title={r.skills}>{r.skills}</td>
+          <td className="adm-td-links">
+            {r.portfolio && <a href={r.portfolio} target="_blank" rel="noreferrer">Portfolio</a>}
+            {r.linkedin && <a href={r.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>}
+            {r.resumeUrl && <a href={r.resumeUrl} target="_blank" rel="noreferrer">Resume</a>}
+            {!r.portfolio && !r.linkedin && !r.resumeUrl && "—"}
+          </td>
+          <td className="adm-td-date">{fmtDate(r.createdAt)}</td>
+          <td><StatusSelect value={r.status} options={INTERN_STATUSES} onChange={(s) => onStatus(r.id, s)} /></td>
+        </tr>
       ))}
-    </div>
+    </TableShell>
   );
 }
 
 /* ── Quote requests (service configurator) ───────────────── */
-function QuotesView({ rows, onStatus }: { rows: AdminServiceInquiry[]; onStatus: (id: string, s: string) => void }) {
+function QuotesView({ rows, query, onStatus }: { rows: AdminServiceInquiry[]; query: string; onStatus: (id: string, s: string) => void }) {
   if (rows.length === 0) return <p className="adm-empty">No quote requests yet.</p>;
+  const match = makeMatcher(query);
+  const filtered = rows.filter((r) => match(r.email, r.phone, r.name, r.company, r.serviceName));
   return (
-    <div className="adm-cards">
-      {rows.map((r) => (
-        <article key={r.id} className="adm-card">
-          <div className="adm-card__top">
-            <span className="adm-card__ref">{r.serviceName}</span>
-            <StatusSelect value={r.status} options={INQUIRY_STATUSES} onChange={(s) => onStatus(r.id, s)} />
-          </div>
-          {r.estimate && <div className="adm-quote-estimate">Estimate: <strong>{r.estimate}</strong></div>}
-          <ul className="adm-quote-selections">
-            {r.selections.map((s) => (
-              <li key={s.question}>
-                <span className="adm-quote-q">{s.question}</span>
-                <span className="adm-quote-a">{s.answers.join(", ")}</span>
-              </li>
-            ))}
-          </ul>
-          {r.message && <p className="adm-card__desc">"{r.message}"</p>}
-          <div className="adm-card__meta">
-            <span><strong>{r.name}</strong>{r.company ? ` · ${r.company}` : ""}</span>
-            <span><a href={`mailto:${r.email}`}>{r.email}</a>{r.phone ? ` · ${r.phone}` : ""}</span>
-            <span className="adm-card__date">{fmtDate(r.createdAt)}</span>
-          </div>
-        </article>
+    <TableShell empty={filtered.length === 0} head={<>
+      <th>Service</th><th>Name</th><th>Company</th><th>Email</th><th>Phone</th>
+      <th>Estimate</th><th>Selections</th><th>Created</th><th>Status</th>
+    </>}>
+      {filtered.map((r) => (
+        <tr key={r.id}>
+          <td className="adm-td-strong">{r.serviceName}</td>
+          <td>{r.name}</td>
+          <td>{r.company ?? "—"}</td>
+          <td><a href={`mailto:${r.email}`}>{r.email}</a></td>
+          <td>{r.phone ?? "—"}</td>
+          <td className="adm-td-strong">{r.estimate ?? "—"}</td>
+          <td className="adm-td-clip" title={r.selections.map((s) => `${s.question}: ${s.answers.join(", ")}`).join(" | ")}>
+            {r.selections.map((s) => `${s.question}: ${s.answers.join(", ")}`).join(" · ") || "—"}
+          </td>
+          <td className="adm-td-date">{fmtDate(r.createdAt)}</td>
+          <td><StatusSelect value={r.status} options={INQUIRY_STATUSES} onChange={(s) => onStatus(r.id, s)} /></td>
+        </tr>
       ))}
-    </div>
+    </TableShell>
   );
 }
 
 /* ── Clients ──────────────────────────────────────────────── */
-function ClientsView({ rows, token, onCreated }: { rows: AdminClient[]; token: string; onCreated: () => void }) {
+function ClientsView({ rows, query, token, onCreated }: { rows: AdminClient[]; query: string; token: string; onCreated: () => void }) {
   const empty = { name: "", email: "", company: "", domain: "", mobile: "", dob: "" };
   const [form, setForm] = useState(empty);
   const [busy, setBusy] = useState(false);
@@ -450,6 +508,9 @@ function ClientsView({ rows, token, onCreated }: { rows: AdminClient[]; token: s
       setBusy(false);
     }
   };
+
+  const match = makeMatcher(query);
+  const filtered = rows.filter((c) => match(c.email, c.mobile, c.domain, c.name, c.company));
 
   return (
     <div className="adm-clients">
@@ -493,25 +554,115 @@ function ClientsView({ rows, token, onCreated }: { rows: AdminClient[]; token: s
 
       {/* Client list */}
       {rows.length === 0 ? <p className="adm-empty">No client accounts yet.</p> : (
-        <div className="adm-cards">
-          {rows.map((c) => (
-            <article key={c.id} className="adm-card">
-              <div className="adm-card__top">
-                <span className="adm-card__ref">{c.company}</span>
-                <span className="adm-card__date">{c._count?.tickets ?? 0} tickets</span>
-              </div>
-              <div className="adm-card__meta">
-                <span><strong>{c.name}</strong></span>
-                <span><a href={`mailto:${c.email}`}>{c.email}</a> · {c.mobile}</span>
-                <span>{c.domain}</span>
-                {c.password && <span>Password: <code className="adm-pw">{c.password}</code></span>}
-                <span className="adm-card__date">
-                  Joined {fmtDate(c.createdAt)}{c.lastLoginAt ? ` · last login ${fmtDate(c.lastLoginAt)}` : ""}
-                </span>
-              </div>
-            </article>
+        <TableShell empty={filtered.length === 0} head={<>
+          <th>Company</th><th>Name</th><th>Email</th><th>Mobile</th><th>Domain</th>
+          <th>Password</th><th>Tickets</th><th>Joined</th><th>Last login</th>
+        </>}>
+          {filtered.map((c) => (
+            <tr key={c.id}>
+              <td className="adm-td-strong">{c.company}</td>
+              <td>{c.name}</td>
+              <td><a href={`mailto:${c.email}`}>{c.email}</a></td>
+              <td>{c.mobile}</td>
+              <td>{c.domain}</td>
+              <td>{c.password ? <code className="adm-pw">{c.password}</code> : "—"}</td>
+              <td>{c._count?.tickets ?? 0}</td>
+              <td className="adm-td-date">{fmtDate(c.createdAt)}</td>
+              <td className="adm-td-date">{c.lastLoginAt ? fmtDate(c.lastLoginAt) : "—"}</td>
+            </tr>
           ))}
-        </div>
+        </TableShell>
+      )}
+    </div>
+  );
+}
+
+/* ── Payments ─────────────────────────────────────────────── */
+function PaymentsView({ rows, clients, query, token, onCreated }: {
+  rows: AdminPayment[]; clients: AdminClient[]; query: string; token: string; onCreated: () => void;
+}) {
+  const empty = { accountId: "", amount: "", description: "", invoiceNo: "", method: "", paidAt: "" };
+  const [form, setForm] = useState(empty);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [ok, setOk] = useState("");
+
+  const set = (k: keyof typeof empty, v: string) => setForm((p) => ({ ...p, [k]: v }));
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setError(""); setOk("");
+    try {
+      await adminApi.createPayment(token, {
+        accountId: form.accountId,
+        amount: Number(form.amount),
+        description: form.description,
+        invoiceNo: form.invoiceNo || undefined,
+        method: form.method || undefined,
+        paidAt: form.paidAt || undefined
+      });
+      setOk("Payment recorded.");
+      setForm(empty);
+      onCreated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not record payment");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const match = makeMatcher(query);
+  const filtered = rows.filter((p) =>
+    match(p.account?.email, p.account?.domain, p.account?.company, p.description, p.invoiceNo));
+
+  return (
+    <div className="adm-clients">
+      {/* Record a payment */}
+      <section className="adm-panel adm-create">
+        <h3><CreditCard size={16} /> Record a client payment</h3>
+        {clients.length === 0 ? (
+          <p className="adm-create__hint">Open the Clients tab once to load client accounts, then record a payment here.</p>
+        ) : (
+          <form className="adm-create__form" onSubmit={submit}>
+            <div className="adm-create__grid">
+              <select required value={form.accountId} onChange={(e) => set("accountId", e.target.value)}>
+                <option value="">Select client…</option>
+                {clients.map((c) => <option key={c.id} value={c.id}>{c.company} · {c.domain}</option>)}
+              </select>
+              <input placeholder="Amount (₹)" type="number" min={1} required value={form.amount} onChange={(e) => set("amount", e.target.value)} />
+              <input placeholder="Description (e.g. Website build — phase 1)" required value={form.description} onChange={(e) => set("description", e.target.value)} />
+              <input placeholder="Invoice no. (optional)" value={form.invoiceNo} onChange={(e) => set("invoiceNo", e.target.value)} />
+              <input placeholder="Method (UPI / Bank / Card)" value={form.method} onChange={(e) => set("method", e.target.value)} />
+              <input placeholder="Paid on" type="date" value={form.paidAt} onChange={(e) => set("paidAt", e.target.value)} />
+            </div>
+            {error && <p className="adm-error"><AlertCircle size={14} /> {error}</p>}
+            {ok && <p className="adm-ok"><CheckCircle2 size={14} /> {ok}</p>}
+            <button className="button button--primary" type="submit" disabled={busy}>
+              {busy ? <><RefreshCw size={15} className="spin" /> Saving…</> : <><Plus size={15} /> Record payment</>}
+            </button>
+          </form>
+        )}
+      </section>
+
+      {/* Payment list */}
+      {rows.length === 0 ? <p className="adm-empty">No payments recorded yet.</p> : (
+        <TableShell empty={filtered.length === 0} head={<>
+          <th>Client</th><th>Domain</th><th>Amount</th><th>Description</th>
+          <th>Invoice</th><th>Method</th><th>Paid on</th><th>Status</th>
+        </>}>
+          {filtered.map((p) => (
+            <tr key={p.id}>
+              <td className="adm-td-strong">{p.account?.company ?? "—"}</td>
+              <td>{p.account?.domain ?? "—"}</td>
+              <td className="adm-td-strong">{fmtINR(p.amount)}</td>
+              <td className="adm-td-clip" title={p.description}>{p.description}</td>
+              <td>{p.invoiceNo ?? "—"}</td>
+              <td>{p.method ?? "—"}</td>
+              <td className="adm-td-date">{fmtDate(p.paidAt)}</td>
+              <td><StatusBadge status={p.status} /></td>
+            </tr>
+          ))}
+        </TableShell>
       )}
     </div>
   );

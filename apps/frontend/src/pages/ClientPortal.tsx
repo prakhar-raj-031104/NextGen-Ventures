@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import {
   AlertCircle,
@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  CreditCard,
   Eye,
   EyeOff,
   FileText,
@@ -42,7 +43,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { api } from "../lib/api";
 import { addOnEstimates } from "../data/fallback";
 import { useClientAuth } from "../hooks/useClientAuth";
-import type { TicketPayload } from "../types";
+import type { ClientPayment, ClientTicketRow, TicketPayload } from "../types";
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -134,6 +138,36 @@ export default function ClientPortal() {
 
   /* ── Authentication ──────────────────────────────────────── */
   const auth = useClientAuth();
+
+  /* ── Account dashboard data (payments + tickets) ─────────── */
+  const [payments, setPayments] = useState<ClientPayment[]>([]);
+  const [myTickets, setMyTickets] = useState<ClientTicketRow[]>([]);
+  const [dashLoading, setDashLoading] = useState(false);
+
+  const loadDash = useCallback(async () => {
+    if (!auth.token) return;
+    setDashLoading(true);
+    try {
+      const [pay, tks] = await Promise.all([
+        api.getMyPayments(auth.token),
+        api.getMyTickets(auth.token)
+      ]);
+      setPayments(pay);
+      setMyTickets(tks);
+    } catch {
+      /* non-critical — the portal still works without the dashboard */
+    } finally {
+      setDashLoading(false);
+    }
+  }, [auth.token]);
+
+  useEffect(() => {
+    if (auth.account && auth.token) void loadDash();
+  }, [auth.account, auth.token, loadDash]);
+
+  const totalPaid = payments
+    .filter((p) => p.status === "PAID")
+    .reduce((sum, p) => sum + p.amount, 0);
   const [authMode, setAuthMode]   = useState<"register" | "login">("register");
   const [authStatus, setAuthStatus] = useState<"idle" | "working">("idle");
   const [authError, setAuthError]   = useState("");
@@ -313,6 +347,7 @@ export default function ClientPortal() {
       );
       setTicketNumber(res.data.ticketNumber);
       setStatus("success");
+      void loadDash();
 
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         gsap.to(formRef.current, {
@@ -642,6 +677,79 @@ export default function ClientPortal() {
               <button type="button" className="cp-account-bar__logout" onClick={handleLogout}>
                 <LogOut size={15} /> Sign out
               </button>
+            </div>
+
+            {/* ── Account dashboard (details · payments · tickets) ── */}
+            <div className="cp-dash">
+              {/* Account details */}
+              <section className="cp-dash-card">
+                <div className="cp-dash-card__head"><Users size={16} /><h3>Your account details</h3></div>
+                <div className="cp-table-wrap">
+                  <table className="cp-table">
+                    <tbody>
+                      <tr><th>Name</th><td>{auth.account.name}</td></tr>
+                      <tr><th>Email</th><td>{auth.account.email}</td></tr>
+                      <tr><th>Company / Brand</th><td>{auth.account.company}</td></tr>
+                      <tr><th>Domain</th><td>{auth.account.domain}</td></tr>
+                      <tr><th>Mobile</th><td>{auth.account.mobile}</td></tr>
+                      <tr><th>Date of birth</th><td>{fmtDate(auth.account.dob)}</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* Payments */}
+              <section className="cp-dash-card">
+                <div className="cp-dash-card__head">
+                  <CreditCard size={16} /><h3>Your payments</h3>
+                  {payments.length > 0 && <span className="cp-dash-card__total">Total paid: {fmtINR(totalPaid)}</span>}
+                </div>
+                {dashLoading ? <p className="cp-dash-empty">Loading…</p>
+                  : payments.length === 0 ? <p className="cp-dash-empty">No payments recorded yet.</p> : (
+                  <div className="cp-table-wrap">
+                    <table className="cp-table cp-table--data">
+                      <thead><tr><th>Date</th><th>Description</th><th>Invoice</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {payments.map((p) => (
+                          <tr key={p.id}>
+                            <td>{fmtDate(p.paidAt)}</td>
+                            <td>{p.description}</td>
+                            <td>{p.invoiceNo ?? "—"}</td>
+                            <td>{p.method ?? "—"}</td>
+                            <td className="cp-table__amount">{fmtINR(p.amount)}</td>
+                            <td><span className="cp-pill" data-st={p.status}>{p.status}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+
+              {/* Tickets */}
+              <section className="cp-dash-card">
+                <div className="cp-dash-card__head"><Ticket size={16} /><h3>Your tickets</h3></div>
+                {dashLoading ? <p className="cp-dash-empty">Loading…</p>
+                  : myTickets.length === 0 ? <p className="cp-dash-empty">No tickets yet — raise your first request below.</p> : (
+                  <div className="cp-table-wrap">
+                    <table className="cp-table cp-table--data">
+                      <thead><tr><th>Ticket</th><th>Title</th><th>Service</th><th>Priority</th><th>Raised</th><th>Status</th></tr></thead>
+                      <tbody>
+                        {myTickets.map((tk) => (
+                          <tr key={tk.id}>
+                            <td className="cp-table__mono">{tk.ticketNumber}</td>
+                            <td>{tk.title || tk.requestType}</td>
+                            <td>{tk.serviceType}</td>
+                            <td>{tk.priority}</td>
+                            <td>{fmtDate(tk.createdAt)}</td>
+                            <td><span className="cp-pill" data-st={tk.status}>{tk.status.replace(/_/g, " ")}</span></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
             </div>
 
             {/* Form header */}

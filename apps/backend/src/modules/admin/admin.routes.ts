@@ -5,6 +5,7 @@ import { validateBody } from "../../middleware/validate.js";
 import {
   adminLoginSchema,
   createClientSchema,
+  createPaymentSchema,
   inquiryStatusSchema,
   internshipStatusSchema,
   leadStatusSchema,
@@ -13,10 +14,12 @@ import {
 import {
   adminLogin,
   createClient,
+  createPayment,
   listClients,
   listInquiries,
   listInternships,
   listLeads,
+  listPayments,
   listTickets,
   overview,
   updateInquiryStatus,
@@ -49,3 +52,6 @@ adminRouter.post("/clients", validateBody(createClientSchema), createClient);
 
 adminRouter.get("/inquiries", listInquiries);
 adminRouter.patch("/inquiries/:id", validateBody(inquiryStatusSchema), updateInquiryStatus);
+
+adminRouter.get("/payments", listPayments);
+adminRouter.post("/payments", validateBody(createPaymentSchema), createPayment);

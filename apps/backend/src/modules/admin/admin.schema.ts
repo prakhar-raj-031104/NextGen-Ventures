@@ -36,5 +36,16 @@ export const createClientSchema = z.object({
   dob:     z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date of birth must be YYYY-MM-DD")
 });
 
+export const createPaymentSchema = z.object({
+  accountId:   z.string().trim().min(1, "Client account is required"),
+  amount:      z.number().int().positive("Amount must be greater than zero"),
+  description: z.string().trim().min(2).max(200),
+  invoiceNo:   z.string().trim().max(60).optional(),
+  method:      z.string().trim().max(40).optional(),
+  status:      z.enum(["PAID", "PENDING", "REFUNDED"]).optional(),
+  paidAt:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD").optional()
+});
+
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
 export type CreateClientInput = z.infer<typeof createClientSchema>;
+export type CreatePaymentInput = z.infer<typeof createPaymentSchema>;

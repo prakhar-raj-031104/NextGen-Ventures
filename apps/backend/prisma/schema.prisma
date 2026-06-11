@@ -79,6 +79,29 @@ model ClientAccount {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   tickets      ClientTicket[]
+  payments     Payment[]
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  accountId   String
+  account     ClientAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  amount      Int           // amount in INR (whole rupees)
+  description String
+  invoiceNo   String?
+  method      String?       // e.g. UPI, Bank Transfer, Card
+  status      PaymentStatus @default(PAID)
+  paidAt      DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([accountId])
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  REFUNDED
 }
 
 model ClientTicket {
